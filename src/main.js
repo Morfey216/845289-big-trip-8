@@ -2,6 +2,7 @@ import makeFilter from './make-filter.js';
 import makePoint from './make-point.js';
 
 const START_AMOUNT_OF_POINTS = 7;
+const MAX_RANDOM_OF_POINTS = 15;
 
 const filtersPosition = document.querySelector(`.trip-filter`);
 const tripPointsPosition = document.querySelector(`.trip-day__items`);
@@ -18,3 +19,34 @@ const renderTripPoints = (dist, amount) => {
 };
 
 renderTripPoints(tripPointsPosition, START_AMOUNT_OF_POINTS);
+
+const clearTripPoints = () => {
+  while (tripPointsPosition.firstChild) {
+    tripPointsPosition.removeChild(tripPointsPosition.firstChild);
+  }
+};
+
+const initFilterButton = (filterButton) => {
+  const onFilterButtonClick = () => {
+    let amountOfPoints;
+    switch (filterButton.id) {
+      case `filter-everything`:
+        amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
+        break;
+      case `filter-future`:
+        amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
+        break;
+      case `filter-past`:
+        amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
+        break;
+    }
+    clearTripPoints();
+    renderTripPoints(tripPointsPosition, amountOfPoints);
+  };
+
+  filterButton.addEventListener(`click`, onFilterButtonClick);
+};
+
+const filterButtons = filtersPosition.querySelectorAll(`input`);
+
+filterButtons.forEach(initFilterButton);
