@@ -1,5 +1,6 @@
 import makeFilter from './make-filter.js';
 import makePoint from './make-point.js';
+import pointData from './get-point-data.js';
 
 const START_AMOUNT_OF_POINTS = 7;
 const MAX_RANDOM_OF_POINTS = 15;
@@ -11,14 +12,15 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Everything`, true));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
-const renderTripPoints = (dist, amount) => {
-  const points = new Array(amount)
-    .fill()
-    .map(makePoint);
-  dist.insertAdjacentHTML(`beforeend`, points.join(``));
+const renderTripPoints = (dist, allPoints) => {
+  dist.insertAdjacentHTML(`beforeend`, allPoints.map(makePoint).join(``));
 };
 
-renderTripPoints(tripPointsPosition, START_AMOUNT_OF_POINTS);
+const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
+
+const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
+
+renderTripPoints(tripPointsPosition, tripPoints);
 
 const clearTripPoints = () => {
   while (tripPointsPosition.firstChild) {
@@ -28,20 +30,20 @@ const clearTripPoints = () => {
 
 const initFilterButton = (filterButton) => {
   const onFilterButtonClick = () => {
-    let amountOfPoints;
+    let newTripPoints;
     switch (filterButton.id) {
       case `filter-everything`:
-        amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
+        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
         break;
       case `filter-future`:
-        amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
+        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
         break;
       case `filter-past`:
-        amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
+        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
         break;
     }
     clearTripPoints();
-    renderTripPoints(tripPointsPosition, amountOfPoints);
+    renderTripPoints(tripPointsPosition, newTripPoints);
   };
 
   filterButton.addEventListener(`click`, onFilterButtonClick);
