@@ -53,6 +53,14 @@ const OFFERS = [
   `Choose seats`
 ];
 
+const CITIES = [
+  `Amsterdam`,
+  `Geneva`,
+  `Chamonix`,
+  `Istambul`,
+  `Venice`
+];
+
 const createSchedule = () => {
   const start = Date.now() + getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 * 60 * 1000;
   const end = start + (getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 + getNumberFromRange(TIME_INTERVAL.MIN_MINUTE, TIME_INTERVAL.MAX_MINUTE)) * 60 * 1000;
@@ -96,8 +104,11 @@ const createCurrentType = () => {
   });
 };
 
+const createPlace = () => CITIES[getNumberFromRange(0, CITIES.length - 1)];
+
 export default () => ({
   type: createCurrentType(),
+  place: createPlace(),
   schedule: createSchedule(),
   price: getNumberFromRange(),
   offers: createOffers(),
