@@ -1,6 +1,7 @@
 import {
   getNumberFromRange,
-  getItemsFromArray} from './random.js';
+  getItemsFromArray
+} from './random.js';
 
 const TIME_INTERVAL = {
   MIN_HOUR: 0,
@@ -78,26 +79,30 @@ const createSchedule = () => {
   });
 };
 
+const createOffer = (currentOffer) => ({
+  name: currentOffer,
+  price: getNumberFromRange()
+});
+
 const createOffers = () => {
   const offersName = getItemsFromArray(OFFERS.slice(), getNumberFromRange(OFFERS_INTERVAL.MIN, OFFERS_INTERVAL.MAX + 1));
   const offers = [];
-  for (const offer of offersName) {
-    const currentOffer = {
-      name: offer,
-      price: getNumberFromRange()
-    };
 
-    offers.push(currentOffer);
+  for (const offer of offersName) {
+    offers.push(createOffer(offer));
   }
 
   return offers;
 };
 
-const createDescription = () => getItemsFromArray(DESCRIPTIONS.slice(), getNumberFromRange(DESCRIPTIONS_INTERVAL.MIN, DESCRIPTIONS_INTERVAL.MAX + 1)).join(` `);
+const createDescription = () => {
+  return getItemsFromArray(DESCRIPTIONS.slice(), getNumberFromRange(DESCRIPTIONS_INTERVAL.MIN, DESCRIPTIONS_INTERVAL.MAX + 1)).join(` `);
+};
 
 const createCurrentType = () => {
   const typeNames = Object.keys(TYPES);
   const type = typeNames[getNumberFromRange(0, typeNames.length - 1)];
+
   return ({
     title: type,
     icon: TYPES[type]
@@ -113,5 +118,4 @@ export default () => ({
   price: getNumberFromRange(),
   offers: createOffers(),
   description: createDescription()
-
 });
