@@ -96,7 +96,8 @@ const createOffers = () => {
 };
 
 const createDescription = () => {
-  return getItemsFromArray(DESCRIPTIONS.slice(), getNumberFromRange(DESCRIPTIONS_INTERVAL.MIN, DESCRIPTIONS_INTERVAL.MAX + 1)).join(` `);
+  const numberOfSentences = getNumberFromRange(DESCRIPTIONS_INTERVAL.MIN, DESCRIPTIONS_INTERVAL.MAX + 1);
+  return getItemsFromArray(DESCRIPTIONS.slice(), numberOfSentences).join(` `);
 };
 
 const createCurrentType = () => {
