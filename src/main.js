@@ -20,7 +20,6 @@ const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
 
 const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
 
-// renderTripPoints(tripPointsPosition, START_AMOUNT_OF_POINTS);
 renderTripPoints(tripPointsPosition, tripPoints);
 
 const clearTripPoints = () => {
@@ -31,20 +30,16 @@ const clearTripPoints = () => {
 
 const initFilterButton = (filterButton) => {
   const onFilterButtonClick = () => {
-    // let amountOfPoints;
     let newTripPoints;
     switch (filterButton.id) {
       case `filter-everything`:
         newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        // amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
         break;
       case `filter-future`:
         newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        // amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
         break;
       case `filter-past`:
         newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        // amountOfPoints = Math.floor(Math.random() * MAX_RANDOM_OF_POINTS);
         break;
     }
     clearTripPoints();

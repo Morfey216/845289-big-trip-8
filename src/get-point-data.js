@@ -64,13 +64,9 @@ const createSchedule = () => {
   };
 
   return ({
-    // startTime: start.getHours(),
-    // startTime: start.toLocaleString(`en-US`, options),
-    // endTime: end.toLocaleString(`en-US`, options),
-    startTime: Intl.DateTimeFormat(`en-US`, options).format(start),
-    endTime: Intl.DateTimeFormat(`en-US`, options).format(end),
-    duration: Intl.DateTimeFormat(`en-US`, options).format(end - start)
-    // duration: (end - start).toLocaleString(`en-US`, options)
+    startTime: new Intl.DateTimeFormat(`en-US`, options).format(start),
+    endTime: new Intl.DateTimeFormat(`en-US`, options).format(end),
+    duration: new Intl.DateTimeFormat(`en-US`, options).format(end - start)
   });
 };
 

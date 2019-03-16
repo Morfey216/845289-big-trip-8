@@ -5,7 +5,6 @@ export const getItemsFromArray = (array, number) => {
 
   for (let i = 0; i < number; i++) {
     resultArray.push(array.splice(getNumberFromRange(0, array.length), 1)[0]);
-    console.log(number);
   }
 
   return resultArray;
