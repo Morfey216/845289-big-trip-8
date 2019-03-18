@@ -2,6 +2,7 @@ import makeFilter from './make-filter.js';
 // import makePoint from './make-point.js';
 import pointData from './get-point-data.js';
 import Point from './point.js';
+import EditPoint from './edit-point.js';
 
 const START_AMOUNT_OF_POINTS = 7;
 const MAX_RANDOM_OF_POINTS = 15;
@@ -21,6 +22,7 @@ const renderTripPoints = (dist, allPoints) => {
   // dist.insertAdjacentHTML(`beforeend`, allPoints.map(makePoint).join(``));
   for (const point of allPoints) {
     const newPoint = new Point(point);
+    const newEditPoint = new EditPoint(point);
     newPoint.render(dist);
   }
 };
