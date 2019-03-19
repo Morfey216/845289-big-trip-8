@@ -8,6 +8,7 @@ export default class Point {
     this._price = data.price;
     this._offers = data.offers;
     this._description = data.description;
+    this._pictures = data.pictures;
 
     this._element = null;
     this._state = {
