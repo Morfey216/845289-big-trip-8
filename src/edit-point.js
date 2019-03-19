@@ -12,8 +12,10 @@ export default class EditPoint {
 
     this._element = null;
     this._state = {
-      isEdit: false
+      // State
     };
+
+    this._onSave = null;
   }
 
   _onSaveButtonClick(evt) {
