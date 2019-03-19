@@ -18,7 +18,9 @@ export default class EditPoint {
 
   _onSaveButtonClick(evt) {
     evt.preventDefault();
-    typeof this._onSave === `function` && this._onSave();
+    if (typeof this._onSave === `function`) {
+      this._onSave();
+    }
   }
 
   set onSave(fn) {

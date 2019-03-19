@@ -20,7 +20,9 @@ export default class Point {
 
   _onClick(evt) {
     evt.preventDefault();
-    typeof this._onEdit === `function` && this._onEdit();
+    if (typeof this._onEdit === `function`) {
+      this._onEdit();
+    }
   }
 
   set onEdit(fn) {
