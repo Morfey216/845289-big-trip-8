@@ -16,6 +16,19 @@ export default class EditPoint {
     };
   }
 
+  _onSaveButtonClick(evt) {
+    evt.preventDefault();
+    typeof this._onSave === `function` && this._onSave();
+  }
+
+  set onSave(fn) {
+    this._onSave = fn;
+  }
+
+  get element() {
+    return this._element;
+  }
+
   get template() {
     return `
     <article class="point">
@@ -129,13 +142,22 @@ export default class EditPoint {
 </article>`.trim();
   }
 
-  render(container) {
-    if (this._element) {
-      container.removeChild(this._element);
-      this._element = null;
-    }
-
+  render() {
     this._element = createElement(this.template);
-    container.appendChild(this._element);
+    this.bind();
+    return this._element;
+  }
+
+  unrender() {
+    this.unbind();
+    this._element = null;
+  }
+
+  bind() {
+    this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick.bind(this));
+  }
+
+  unbind() {
+    this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick.bind(this));
   }
 }

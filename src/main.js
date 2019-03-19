@@ -21,9 +21,23 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 const renderTripPoints = (dist, allPoints) => {
   // dist.insertAdjacentHTML(`beforeend`, allPoints.map(makePoint).join(``));
   for (const point of allPoints) {
-    const newPoint = new Point(point);
-    const newEditPoint = new EditPoint(point);
-    newPoint.render(dist);
+    const pointComponent = new Point(point);
+    const editPointComponent = new EditPoint(point);
+    // pointComponent.render(dist);
+
+    pointComponent.onEdit = () => {
+      editPointComponent.render();
+      dist.replaceChild(editPointComponent.element, pointComponent.element);
+      pointComponent.unrender();
+    };
+
+    editPointComponent.onSave = () => {
+      pointComponent.render();
+      dist.replaceChild(pointComponent.element, editPointComponent.element);
+      editPointComponent.unrender();
+    };
+
+    dist.appendChild(pointComponent.render());
   }
 };
 

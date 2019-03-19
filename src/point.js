@@ -12,8 +12,23 @@ export default class Point {
 
     this._element = null;
     this._state = {
-      isEdit: false
+      // States
     };
+
+    this._onEdit = null;
+  }
+
+  _onClick(evt) {
+    evt.preventDefault();
+    typeof this._onEdit === `function` && this._onEdit();
+  }
+
+  set onEdit(fn) {
+    this._onEdit = fn;
+  }
+
+  get element() {
+    return this._element;
   }
 
   get template() {
@@ -36,13 +51,24 @@ export default class Point {
     </article>`.trim();
   }
 
-  render(container) {
-    if (this._element) {
-      container.removeChild(this._element);
-      this._element = null;
-    }
-
+  render() {
     this._element = createElement(this.template);
-    container.appendChild(this._element);
+    this.bind();
+    return this._element;
+  }
+
+  unrender() {
+    this.unbind();
+    this._element = null;
+  }
+
+  bind() {
+    // this._element.querySelector(`.trip-point`).addEventListener(`click`, this._onClick.bind(this));
+    this._element.addEventListener(`click`, this._onClick.bind(this));
+  }
+
+  unbind() {
+    // Удаление обработчиков
+    this._element.removeEventListener(`click`, this._onClick.bind(this));
   }
 }
