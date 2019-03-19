@@ -15,6 +15,8 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
 const renderTripPoints = (dist, allPoints) => {
+  const pointFragment = document.createDocumentFragment();
+
   for (const point of allPoints) {
     const pointComponent = new Point(point);
     const editPointComponent = new EditPoint(point);
@@ -31,8 +33,10 @@ const renderTripPoints = (dist, allPoints) => {
       editPointComponent.unrender();
     };
 
-    dist.appendChild(pointComponent.render());
+    pointFragment.appendChild(pointComponent.render());
   }
+
+  dist.appendChild(pointFragment);
 };
 
 const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
