@@ -63,12 +63,10 @@ export default class Point {
   }
 
   bind() {
-    // this._element.querySelector(`.trip-point`).addEventListener(`click`, this._onClick.bind(this));
     this._element.addEventListener(`click`, this._onClick.bind(this));
   }
 
   unbind() {
-    // Удаление обработчиков
     this._element.removeEventListener(`click`, this._onClick.bind(this));
   }
 }

@@ -14,16 +14,10 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Everything`, true));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
-// const renderTripPoints = (dist, allPoints) => {
-//   dist.insertAdjacentHTML(`beforeend`, allPoints.map(makePoint).join(``));
-// };
-
 const renderTripPoints = (dist, allPoints) => {
-  // dist.insertAdjacentHTML(`beforeend`, allPoints.map(makePoint).join(``));
   for (const point of allPoints) {
     const pointComponent = new Point(point);
     const editPointComponent = new EditPoint(point);
-    // pointComponent.render(dist);
 
     pointComponent.onEdit = () => {
       editPointComponent.render();
@@ -77,6 +71,3 @@ const initFilterButton = (filterButton) => {
 const filterButtons = filtersPosition.querySelectorAll(`input`);
 
 filterButtons.forEach(initFilterButton);
-
-// const firstTask = new Point(pointData);
-// firstTask.render(tripPointsPosition);
