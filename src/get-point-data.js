@@ -20,6 +20,11 @@ const DESCRIPTIONS_INTERVAL = {
   MAX: 3
 };
 
+const PICTURES_INTERVAL = {
+  MIN: 2,
+  MAX: 4
+};
+
 const TYPES = {
   'Taxi': `🚕`,
   'Bus': `🚌`,
@@ -112,11 +117,22 @@ const createCurrentType = () => {
 
 const createPlace = () => CITIES[getNumberFromRange(0, CITIES.length - 1)];
 
+const createPictures = () => {
+  const numberOfPictures = getNumberFromRange(PICTURES_INTERVAL.MIN, PICTURES_INTERVAL.MAX + 1);
+  const pictures = [];
+  for (let i = 0; i < numberOfPictures; i++) {
+    pictures.push(`http://picsum.photos/300/150?r=${Math.random()}`);
+  }
+
+  return pictures;
+};
+
 export default () => ({
   type: createCurrentType(),
   place: createPlace(),
   schedule: createSchedule(),
   price: getNumberFromRange(),
   offers: createOffers(),
-  description: createDescription()
+  description: createDescription(),
+  pictures: createPictures()
 });

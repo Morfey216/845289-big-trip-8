@@ -1,6 +1,8 @@
 import makeFilter from './make-filter.js';
-import makePoint from './make-point.js';
+// import makePoint from './make-point.js';
 import pointData from './get-point-data.js';
+import Point from './point.js';
+import EditPoint from './edit-point.js';
 
 const START_AMOUNT_OF_POINTS = 7;
 const MAX_RANDOM_OF_POINTS = 15;
@@ -13,7 +15,28 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
 const renderTripPoints = (dist, allPoints) => {
-  dist.insertAdjacentHTML(`beforeend`, allPoints.map(makePoint).join(``));
+  const pointFragment = document.createDocumentFragment();
+
+  for (const point of allPoints) {
+    const pointComponent = new Point(point);
+    const editPointComponent = new EditPoint(point);
+
+    pointComponent.onEdit = () => {
+      editPointComponent.render();
+      dist.replaceChild(editPointComponent.element, pointComponent.element);
+      pointComponent.unrender();
+    };
+
+    editPointComponent.onSave = () => {
+      pointComponent.render();
+      dist.replaceChild(pointComponent.element, editPointComponent.element);
+      editPointComponent.unrender();
+    };
+
+    pointFragment.appendChild(pointComponent.render());
+  }
+
+  dist.appendChild(pointFragment);
 };
 
 const getTripPoints = (amount) => new Array(amount).fill().map(pointData);

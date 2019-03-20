@@ -9,8 +9,8 @@ export default (pointData) => `<article class="trip-point">
   <ul class="trip-point__offers">
     ${pointData.offers.map((offer) => (
     `<li>
-        <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
-      </li>`
+      <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
+    </li>`
   )).join(``)}
   </ul>
 </article>`;
