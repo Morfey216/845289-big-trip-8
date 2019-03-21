@@ -1,7 +1,9 @@
-import createElement from './create-element.js';
+import PointComponent from './point-component.js';
+// import createElement from './create-element.js';
 
-export default class Point {
+export default class Point extends PointComponent {
   constructor(data) {
+    super();
     this._type = data.type;
     this._place = data.place;
     this._schedule = data.schedule;
@@ -16,9 +18,10 @@ export default class Point {
     };
 
     this._onEdit = null;
+    this._onPointClick = this._onPointClick.bind(this);
   }
 
-  _onClick(evt) {
+  _onPointClick(evt) {
     evt.preventDefault();
     if (typeof this._onEdit === `function`) {
       this._onEdit();
@@ -29,9 +32,9 @@ export default class Point {
     this._onEdit = fn;
   }
 
-  get element() {
-    return this._element;
-  }
+  //   get element() {
+  //     return this._element;
+  //   }
 
   get template() {
     return `
@@ -53,22 +56,22 @@ export default class Point {
     </article>`.trim();
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
+  //   render() {
+  //     this._element = createElement(this.template);
+  //     this.bind();
+  //     return this._element;
+  //   }
 
-  unrender() {
-    this.unbind();
-    this._element = null;
-  }
+  //   unrender() {
+  //     this.unbind();
+  //     this._element = null;
+  //   }
 
   bind() {
-    this._element.addEventListener(`click`, this._onClick.bind(this));
+    this._element.addEventListener(`click`, this._onPointClick);
   }
 
   unbind() {
-    this._element.removeEventListener(`click`, this._onClick.bind(this));
+    this._element.removeEventListener(`click`, this._onPointClick);
   }
 }

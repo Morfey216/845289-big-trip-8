@@ -1,7 +1,9 @@
-import createElement from './create-element.js';
+import PointComponent from './point-component.js';
+// import createElement from './create-element.js';
 
-export default class EditPoint {
+export default class EditPoint extends PointComponent {
   constructor(data) {
+    super();
     this._type = data.type;
     this._place = data.place;
     this._schedule = data.schedule;
@@ -16,6 +18,7 @@ export default class EditPoint {
     };
 
     this._onSave = null;
+    this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
   }
 
   _onSaveButtonClick(evt) {
@@ -29,9 +32,9 @@ export default class EditPoint {
     this._onSave = fn;
   }
 
-  get element() {
-    return this._element;
-  }
+  //   get element() {
+  //     return this._element;
+  //   }
 
   get template() {
     return `
@@ -146,22 +149,22 @@ export default class EditPoint {
 </article>`.trim();
   }
 
-  render() {
-    this._element = createElement(this.template);
-    this.bind();
-    return this._element;
-  }
+  //   render() {
+  //     this._element = createElement(this.template);
+  //     this.bind();
+  //     return this._element;
+  //   }
 
-  unrender() {
-    this.unbind();
-    this._element = null;
-  }
+  //   unrender() {
+  //     this.unbind();
+  //     this._element = null;
+  //   }
 
   bind() {
-    this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick.bind(this));
+    this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick);
   }
 
   unbind() {
-    this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick.bind(this));
+    this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick);
   }
 }
