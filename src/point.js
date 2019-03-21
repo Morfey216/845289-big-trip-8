@@ -11,8 +11,6 @@ export default class Point extends PointComponent {
     this._description = data.description;
     this._pictures = data.pictures;
 
-    this._element = null;
-
     this._onEdit = null;
     this._onPointClick = this._onPointClick.bind(this);
   }

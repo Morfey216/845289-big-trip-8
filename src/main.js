@@ -33,6 +33,12 @@ const renderTripPoints = (dist, allPoints) => {
       editPointComponent.unrender();
     };
 
+    editPointComponent.onReset = () => {
+      pointComponent.render();
+      dist.replaceChild(pointComponent.element, editPointComponent.element);
+      editPointComponent.unrender();
+    };
+
     pointFragment.appendChild(pointComponent.render());
   }
 
