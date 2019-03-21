@@ -1,5 +1,4 @@
 import PointComponent from './point-component.js';
-// import createElement from './create-element.js';
 
 export default class Point extends PointComponent {
   constructor(data) {
@@ -13,9 +12,6 @@ export default class Point extends PointComponent {
     this._pictures = data.pictures;
 
     this._element = null;
-    this._state = {
-      // States
-    };
 
     this._onEdit = null;
     this._onPointClick = this._onPointClick.bind(this);
@@ -31,10 +27,6 @@ export default class Point extends PointComponent {
   set onEdit(fn) {
     this._onEdit = fn;
   }
-
-  //   get element() {
-  //     return this._element;
-  //   }
 
   get template() {
     return `
@@ -55,17 +47,6 @@ export default class Point extends PointComponent {
       </ul>
     </article>`.trim();
   }
-
-  //   render() {
-  //     this._element = createElement(this.template);
-  //     this.bind();
-  //     return this._element;
-  //   }
-
-  //   unrender() {
-  //     this.unbind();
-  //     this._element = null;
-  //   }
 
   bind() {
     this._element.addEventListener(`click`, this._onPointClick);

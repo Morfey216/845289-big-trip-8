@@ -1,5 +1,4 @@
 import PointComponent from './point-component.js';
-// import createElement from './create-element.js';
 
 export default class EditPoint extends PointComponent {
   constructor(data) {
@@ -13,9 +12,6 @@ export default class EditPoint extends PointComponent {
     this._pictures = data.pictures;
 
     this._element = null;
-    this._state = {
-      // State
-    };
 
     this._onSave = null;
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
@@ -31,10 +27,6 @@ export default class EditPoint extends PointComponent {
   set onSave(fn) {
     this._onSave = fn;
   }
-
-  //   get element() {
-  //     return this._element;
-  //   }
 
   get template() {
     return `
@@ -148,17 +140,6 @@ export default class EditPoint extends PointComponent {
   </form>
 </article>`.trim();
   }
-
-  //   render() {
-  //     this._element = createElement(this.template);
-  //     this.bind();
-  //     return this._element;
-  //   }
-
-  //   unrender() {
-  //     this.unbind();
-  //     this._element = null;
-  //   }
 
   bind() {
     this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick);
