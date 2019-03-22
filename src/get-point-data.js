@@ -84,9 +84,15 @@ const createSchedule = () => {
   });
 };
 
+const initOfferActive = () => {
+  const active = getNumberFromRange();
+  return active % 2 ? true : false;
+};
+
 const createOffer = (currentOffer) => ({
   name: currentOffer,
-  price: getNumberFromRange()
+  price: getNumberFromRange(),
+  active: initOfferActive()
 });
 
 const createOffers = () => {

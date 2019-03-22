@@ -37,7 +37,7 @@ export default class Point extends PointComponent {
       </p>
       <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
       <ul class="trip-point__offers">
-        ${this._offers.map((offer) => (
+        ${this._offers.filter((it) => it.active).map((offer) => (
     `<li>
             <button class="trip-point__offer">${offer.name} +&euro;&nbsp;${offer.price}</button>
         </li>`

@@ -41,6 +41,13 @@ export default class EditPoint extends PointComponent {
   }
 
   get template() {
+    const offerNameToValue = {
+      'Add luggage': `add-luggage`,
+      'Switch to comfort class': `switch-to-comfort-class`,
+      'Add meal': `add-meal`,
+      'Choose seats': `choose-seats`
+    };
+
     return `
     <article class="point">
   <form action="" method="get">
@@ -51,7 +58,7 @@ export default class EditPoint extends PointComponent {
       </label>
 
       <div class="travel-way">
-        <label class="travel-way__label" for="travel-way__toggle">✈️</label>
+        <label class="travel-way__label" for="travel-way__toggle">${this._type.icon}</label>
 
         <input type="checkbox" class="travel-way__toggle visually-hidden" id="travel-way__toggle">
 
@@ -81,7 +88,7 @@ export default class EditPoint extends PointComponent {
       </div>
 
       <div class="point__destination-wrap">
-        <label class="point__destination-label" for="destination">Flight to</label>
+        <label class="point__destination-label" for="destination">${this._type.title} to</label>
         <input class="point__destination-input" list="destination-select" id="destination" value="${this._place}" name="destination">
         <datalist id="destination-select">
           <option value="airport"></option>
@@ -118,25 +125,12 @@ export default class EditPoint extends PointComponent {
         <h3 class="point__details-title">offers</h3>
 
         <div class="point__offers-wrap">
-          <input class="point__offers-input visually-hidden" type="checkbox" id="add-luggage" name="offer" value="add-luggage">
-          <label for="add-luggage" class="point__offers-label">
-            <span class="point__offer-service">Add luggage</span> + €<span class="point__offer-price">30</span>
-          </label>
-
-          <input class="point__offers-input visually-hidden" type="checkbox" id="switch-to-comfort-class" name="offer" value="switch-to-comfort-class">
-          <label for="switch-to-comfort-class" class="point__offers-label">
-            <span class="point__offer-service">Switch to comfort class</span> + €<span class="point__offer-price">100</span>
-          </label>
-
-          <input class="point__offers-input visually-hidden" type="checkbox" id="add-meal" name="offer" value="add-meal">
-          <label for="add-meal" class="point__offers-label">
-            <span class="point__offer-service">Add meal </span> + €<span class="point__offer-price">15</span>
-          </label>
-
-          <input class="point__offers-input visually-hidden" type="checkbox" id="choose-seats" name="offer" value="choose-seats">
-          <label for="choose-seats" class="point__offers-label">
-            <span class="point__offer-service">Choose seats</span> + €<span class="point__offer-price">5</span>
-          </label>
+          ${this._offers.map((offer) => (
+    `<input class="point__offers-input visually-hidden" type="checkbox" id=${offerNameToValue[offer.name]} name="offer" value=${offerNameToValue[offer.name]} ${offer.active ? `checked` : ``}>
+            <label for=${offerNameToValue[offer.name]} class="point__offers-label">
+            <span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
+          </label>`
+  )).join(``)}
         </div>
 
       </section>
