@@ -99,7 +99,7 @@ const OFFERS = [
   `Choose seats`
 ];
 
-const CITIES = [
+const PLACES = [
   `Amsterdam`,
   `Geneva`,
   `Chamonix`,
@@ -162,7 +162,7 @@ const createCurrentType = () => {
   return TYPES[getNumberFromRange(0, TYPES.length - 1)];
 };
 
-const createPlace = () => CITIES[getNumberFromRange(0, CITIES.length - 1)];
+const createPlace = () => PLACES[getNumberFromRange(0, PLACES.length - 1)];
 
 const createPictures = () => {
   const numberOfPictures = getNumberFromRange(PICTURES_INTERVAL.MIN, PICTURES_INTERVAL.MAX + 1);
@@ -182,5 +182,6 @@ export default () => ({
   offers: createOffers(),
   description: createDescription(),
   pictures: createPictures(),
-  types: TYPES
+  types: TYPES,
+  destinations: PLACES
 });

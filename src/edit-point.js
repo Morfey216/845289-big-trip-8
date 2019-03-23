@@ -12,6 +12,7 @@ export default class EditPoint extends PointComponent {
     this._description = data.description;
     this._pictures = data.pictures;
     this._types = data.types;
+    this._destinations = data.destinations;
 
     this._onSave = null;
     this._onReset = null;
@@ -84,10 +85,8 @@ export default class EditPoint extends PointComponent {
         <label class="point__destination-label" for="destination">${this._type.title} to</label>
         <input class="point__destination-input" list="destination-select" id="destination" value="${this._place}" name="destination">
         <datalist id="destination-select">
-          <option value="airport"></option>
-          <option value="Geneva"></option>
-          <option value="Chamonix"></option>
-          <option value="hotel"></option>
+          ${this._destinations.map((destination) => (
+    `<option value=${destination}></option>`)).join(``)}
         </datalist>
       </div>
 
