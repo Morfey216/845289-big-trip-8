@@ -53,4 +53,14 @@ export default class Point extends PointComponent {
   unbind() {
     this._element.removeEventListener(`click`, this._onPointClick);
   }
+
+  update(data) {
+    this._type = data.type;
+    this._place = data.place;
+    this._schedule = data.schedule;
+    this._price = data.price;
+    this._offers = data.offers;
+    this._description = data.description;
+    this._pictures = data.pictures;
+  }
 }

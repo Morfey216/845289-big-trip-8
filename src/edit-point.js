@@ -14,18 +14,70 @@ export default class EditPoint extends PointComponent {
     this._types = data.types;
     this._destinations = data.destinations;
 
+    this._state.isFavorite = false;
+
     this._onSave = null;
     this._onReset = null;
 
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
     this._onEscKeydown = this._onEscKeydown.bind(this);
+    this._onChangeDate = this._onChangeDate.bind(this);
+    this._onChangeFavorit = this._onChangeFavorit.bind(this);
+  }
+
+  _processForm(formData) {
+    const entry = {
+      // type: {},
+      // place: ``,
+      // schedule: {
+      //   startTime: new Date(),
+      //   endTime: new Date()
+      // },
+      price: ``,
+      offers: []
+    };
+
+    const pointEditMapper = EditPoint.createMapper(entry);
+    const reserveOffers = this._offers;
+
+    for (const pair of formData.entries()) {
+      const [property, value] = pair;
+
+      if (pointEditMapper[property]) {
+        pointEditMapper[property](value);
+      }
+    }
+
+    const createNewOffers = () => {
+      const newOffers = [];
+      for (const oldOffer of reserveOffers) {
+        if (entry.offers.some((it) => it === oldOffer.name)) {
+          (oldOffer.active = true);
+        } else {
+          (oldOffer.active = false);
+        }
+        newOffers.push(oldOffer);
+      }
+      return newOffers;
+    };
+
+    entry.offers = createNewOffers();
+    return entry;
   }
 
   _onSaveButtonClick(evt) {
     evt.preventDefault();
+
+    const formData = new FormData(this._element.querySelector(`form`));
+    const newData = this._processForm(formData);
+
+    console.log(newData);
+
     if (typeof this._onSave === `function`) {
-      this._onSave();
+      this._onSave(newData);
     }
+
+    this.update(newData);
   }
 
   _onEscKeydown(evt) {
@@ -33,6 +85,12 @@ export default class EditPoint extends PointComponent {
       isEscEvent(evt, this._onReset);
     }
   }
+
+  _onChangeFavorit() {
+    this._state.isFavorite = !this._state.isFavorite;
+  }
+
+  _onChangeDate() {}
 
   set onSave(fn) {
     this._onSave = fn;
@@ -142,10 +200,38 @@ export default class EditPoint extends PointComponent {
   bind() {
     this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick);
     document.addEventListener(`keydown`, this._onEscKeydown);
+    this._element.querySelector(`.point__favorite-input`).addEventListener(`click`, this._onChangeFavorit);
   }
 
   unbind() {
     this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick);
     document.removeEventListener(`keydown`, this._onEscKeydown);
+    this._element.querySelector(`.point__favorite-input`).removeEventListener(`click`, this._onChangeFavorit);
+  }
+
+  update(data) {
+    // this._type = data.type;
+    // this._place = data.place;
+    // this._schedule = data.schedule;
+    this._price = data.price;
+    this._offers = data.offers;
+    // this._description = data.description;
+  }
+
+  static createMapper(target) {
+    const offerValueToName = {
+      'add-luggage': `Add luggage`,
+      'switch-to-comfort-class': `Switch to comfort class`,
+      'add-meal': `Add meal`,
+      'choose-seats': `Choose seats`
+    };
+
+    return {
+      // hashtag: (value) => target.tags.add(value),
+      // text: (value) => target.title = value,
+      offer: (value) => target.offers.push(offerValueToName[value]),
+      price: (value) => (target.price = value),
+      // time: (value) => (target.schedule = value),
+    };
   }
 }
