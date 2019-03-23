@@ -71,8 +71,6 @@ export default class EditPoint extends PointComponent {
     const formData = new FormData(this._element.querySelector(`form`));
     const newData = this._processForm(formData);
 
-    console.log(newData);
-
     if (typeof this._onSave === `function`) {
       this._onSave(newData);
     }
@@ -165,7 +163,7 @@ export default class EditPoint extends PointComponent {
       </div>
 
       <div class="paint__favorite-wrap">
-        <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite">
+        <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._state.isFavorite ? `checked` : ``}>
         <label class="point__favorite" for="favorite">favorite</label>
       </div>
     </header>
@@ -227,7 +225,6 @@ export default class EditPoint extends PointComponent {
     };
 
     return {
-      // hashtag: (value) => target.tags.add(value),
       // text: (value) => target.title = value,
       offer: (value) => target.offers.push(offerValueToName[value]),
       price: (value) => (target.price = value),

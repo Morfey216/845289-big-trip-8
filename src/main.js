@@ -37,9 +37,6 @@ const renderTripPoints = (dist, allPoints) => {
     editPointComponent.onSave = (newObject) => {
       const updatedPoint = updatePoint(allPoints, i, newObject);
 
-      console.log(newObject);
-      console.log(updatedPoint);
-
       pointComponent.update(updatedPoint);
       pointComponent.render();
       dist.replaceChild(pointComponent.element, editPointComponent.element);
