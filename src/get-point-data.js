@@ -25,18 +25,58 @@ const PICTURES_INTERVAL = {
   MAX: 4
 };
 
-const TYPES = {
-  'Taxi': `🚕`,
-  'Bus': `🚌`,
-  'Train': `🚂`,
-  'Ship': `🛳️`,
-  'Transport': `🚊`,
-  'Drive': `🚗`,
-  'Flight': `✈️`,
-  'Check-in': `🏨`,
-  'Sightseeing': `🏛️`,
-  'Restaurant': `🍴`
-};
+const TYPES = [
+  {
+    title: `Taxi`,
+    icon: `🚕`,
+    group: `transport`
+  },
+  {
+    title: `Bus`,
+    icon: `🚌`,
+    group: `transport`
+  },
+  {
+    title: `Train`,
+    icon: `🚂`,
+    group: `transport`
+  },
+  {
+    title: `Ship`,
+    icon: `🛳️`,
+    group: `transport`
+  },
+  {
+    title: `Transport`,
+    icon: `🚊`,
+    group: `transport`
+  },
+  {
+    title: `Drive`,
+    icon: `🚗`,
+    group: `transport`
+  },
+  {
+    title: `Flight`,
+    icon: `✈️`,
+    group: `transport`
+  },
+  {
+    title: `Check-in`,
+    icon: `🏨`,
+    group: `service`
+  },
+  {
+    title: `Sightseeing`,
+    icon: `🏛️`,
+    group: `service`
+  },
+  {
+    title: `Restaurant`,
+    icon: `🍴`,
+    group: `service`
+  }
+];
 
 const DESCRIPTIONS = [
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
@@ -112,13 +152,14 @@ const createDescription = () => {
 };
 
 const createCurrentType = () => {
-  const typeNames = Object.keys(TYPES);
-  const type = typeNames[getNumberFromRange(0, typeNames.length - 1)];
+  // const typeNames = Object.keys(TYPES);
+  // const type = getNumberFromRange(0, TYPES.length - 1);
 
-  return ({
-    title: type,
-    icon: TYPES[type]
-  });
+  // return ({
+  //   title: type,
+  //   icon: TYPES[type]
+  // });
+  return TYPES[getNumberFromRange(0, TYPES.length - 1)];
 };
 
 const createPlace = () => CITIES[getNumberFromRange(0, CITIES.length - 1)];
@@ -140,5 +181,6 @@ export default () => ({
   price: getNumberFromRange(),
   offers: createOffers(),
   description: createDescription(),
-  pictures: createPictures()
+  pictures: createPictures(),
+  types: TYPES
 });
