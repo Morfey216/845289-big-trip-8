@@ -48,7 +48,7 @@ export default class EditPoint extends PointComponent {
     };
 
     const pointEditMapper = EditPoint.createMapper(entry);
-    const reserveOffers = this._offers;
+    const currentOffers = this._offers;
     const types = this._types;
 
     for (const pair of formData.entries()) {
@@ -59,15 +59,19 @@ export default class EditPoint extends PointComponent {
       }
     }
 
+    const determineIfOfferIsSelected = (offer) => entry.offers.some((it) => it === offer);
+
     const createNewOffers = () => {
       const newOffers = [];
-      for (const oldOffer of reserveOffers) {
-        if (entry.offers.some((it) => it === oldOffer.name)) {
-          (oldOffer.active = true);
+      for (const currentOffer of currentOffers) {
+        const selectedOffer = determineIfOfferIsSelected(currentOffer.name);
+
+        if (selectedOffer) {
+          currentOffer.active = true;
         } else {
-          (oldOffer.active = false);
+          currentOffer.active = false;
         }
-        newOffers.push(oldOffer);
+        newOffers.push(currentOffer);
       }
       return newOffers;
     };
@@ -112,32 +116,27 @@ export default class EditPoint extends PointComponent {
   }
 
   _onSelectWay(evt) {
-    const types = this._types;
-    this._type.title = evt.target.value;
-    // this.unbind();
-    // this._partialUpdate();
-    // this.bind();
+    this._type = this._getCurrentWay(evt.target.value);
+    this._element.querySelector(`.point__destination-label`).textContent = `${this._type.title} to`;
+    this._element.querySelector(`.travel-way__label`).textContent = this._type.icon;
+    this._element.querySelector(`.travel-way__toggle`).checked = false;
+  }
 
-    const index = types.findIndex((it) => it.title === evt.target.value);
-    this._type = types[index];
+  _getCurrentWay(title) {
+    const types = this._types;
+    const index = types.findIndex((it) => it.title === title);
+    return types[index];
   }
 
   _onChangeDate() {}
 
   _onChangeTime() {
-    const timeInput = this._element.querySelector(`.point__time input`);
-    // const time = this._schedule;
-    flatpickr(
-        timeInput,
-        {
-          enableTime: true,
-          noCalendar: true,
-          // altInput: true,
-          // altFormat: `H:i`,
-          dateFormat: `H:i`,
-          [`time_24hr`]: true
-        }
-    );
+    // this._schedule.duration = this._getDuration();
+    // console.log(this._schedule.duration);
+  }
+
+  _getDuration() {
+    return moment.duration(moment(this._schedule.endTime).diff(moment(this._schedule.startTime)));
   }
 
   _partialUpdate() {
@@ -260,7 +259,29 @@ export default class EditPoint extends PointComponent {
     document.addEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.point__favorite-input`).addEventListener(`click`, this._onChangeFavorit);
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onSelectWay);
-    this._element.querySelector(`.point__time input`).addEventListener(`click`, this._onChangeTime);
+    // this._element.querySelector(`.point__time input`).addEventListener(`click`, this._onChangeTime);
+    const timeInput = this._element.querySelector(`.point__time input`);
+    const time = this._schedule;
+
+    flatpickr(
+        timeInput,
+        {
+          mode: `range`,
+          enableTime: true,
+          noCalendar: true,
+          // altInput: true,
+          // altFormat: `H:i`,
+          dateFormat: `H:i`,
+          defaultDate: [time.startTime, time.endTime],
+          onClose: (selectedDates) => {
+            this._schedule.startTime = selectedDates[0];
+            this._schedule.endTime = selectedDates[1];
+            // this._schedule.duration = moment.duration(selectedDates[1] - selectedDates[0]);
+            this._schedule.duration = moment.duration(moment(this._schedule.endTime).diff(moment(this._schedule.startTime))).format(`HH:mm`);
+          },
+          [`time_24hr`]: true
+        }
+    );
   }
 
   unbind() {
