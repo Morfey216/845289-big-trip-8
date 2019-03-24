@@ -27,52 +27,52 @@ const PICTURES_INTERVAL = {
 
 const TYPES = [
   {
-    title: `Taxi`,
+    title: `taxi`,
     icon: `🚕`,
     group: `transport`
   },
   {
-    title: `Bus`,
+    title: `bus`,
     icon: `🚌`,
     group: `transport`
   },
   {
-    title: `Train`,
+    title: `train`,
     icon: `🚂`,
     group: `transport`
   },
   {
-    title: `Ship`,
+    title: `ship`,
     icon: `🛳️`,
     group: `transport`
   },
   {
-    title: `Transport`,
+    title: `transport`,
     icon: `🚊`,
     group: `transport`
   },
   {
-    title: `Drive`,
+    title: `drive`,
     icon: `🚗`,
     group: `transport`
   },
   {
-    title: `Flight`,
+    title: `flight`,
     icon: `✈️`,
     group: `transport`
   },
   {
-    title: `Check-in`,
+    title: `check-in`,
     icon: `🏨`,
     group: `service`
   },
   {
-    title: `Sightseeing`,
+    title: `sightseeing`,
     icon: `🏛️`,
     group: `service`
   },
   {
-    title: `Restaurant`,
+    title: `restaurant`,
     icon: `🍴`,
     group: `service`
   }
@@ -109,18 +109,25 @@ const PLACES = [
 
 const createSchedule = () => {
   const start = Date.now() + getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 * 60 * 1000;
-  const end = start + (getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 + getNumberFromRange(TIME_INTERVAL.MIN_MINUTE, TIME_INTERVAL.MAX_MINUTE)) * 60 * 1000;
+  const range = (getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 + getNumberFromRange(TIME_INTERVAL.MIN_MINUTE, TIME_INTERVAL.MAX_MINUTE)) * 60 * 1000;
+  const end = start + range;
 
-  const options = {
-    hour12: false,
-    hour: `numeric`,
-    minute: `numeric`
-  };
+  // const options = {
+  //   hour12: false,
+  //   hour: `numeric`,
+  //   minute: `numeric`
+  // };
+
+  // return ({
+  //   startTime: new Intl.DateTimeFormat(`en-US`, options).format(start),
+  //   endTime: new Intl.DateTimeFormat(`en-US`, options).format(end),
+  //   duration: new Intl.DateTimeFormat(`en-US`, options).format(end - start)
+  // });
 
   return ({
-    startTime: new Intl.DateTimeFormat(`en-US`, options).format(start),
-    endTime: new Intl.DateTimeFormat(`en-US`, options).format(end),
-    duration: new Intl.DateTimeFormat(`en-US`, options).format(end - start)
+    startTime: start,
+    endTime: end,
+    duration: range
   });
 };
 

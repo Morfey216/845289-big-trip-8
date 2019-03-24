@@ -1,3 +1,4 @@
+import moment from 'moment';
 import PointComponent from './point-component.js';
 
 export default class Point extends PointComponent {
@@ -32,8 +33,8 @@ export default class Point extends PointComponent {
       <i class="trip-icon">${this._type.icon}</i>
       <h3 class="trip-point__title">${this._type.title} to ${this._place}</h3>
       <p class="trip-point__schedule">
-        <span class="trip-point__timetable">${this._schedule.startTime}&nbsp;&mdash; ${this._schedule.endTime}</span>
-        <span class="trip-point__duration">${this._schedule.duration}</span>
+        <span class="trip-point__timetable">${moment(this._schedule.startTime).format(`HH:mm`)}&nbsp;&mdash; ${moment(this._schedule.endTime).format(`HH:mm`)}</span>
+        <span class="trip-point__duration">${moment.duration(this._schedule.duration)}</span>
       </p>
       <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
       <ul class="trip-point__offers">
