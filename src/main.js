@@ -14,17 +14,23 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Everything`, true));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
-const updatePoint = (points, i, newPoint) => {
-  points[i] = Object.assign({}, points[i], newPoint);
-  return points[i];
+const updatePoint = (points, pointToUpdate, newPoint) => {
+  const index = points.findIndex((it) => it === pointToUpdate);
+  points[index] = Object.assign({}, pointToUpdate, newPoint);
+  return points[index];
+};
+
+const deletePoint = (points, point) => {
+  const index = points.findIndex((it) => it === point);
+  points.splice(index, 1);
+  return points;
 };
 
 const renderTripPoints = (dist, allPoints) => {
   tripPointsPosition.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
-  for (let i = 0; i < allPoints.length; i++) {
-    const point = allPoints[i];
+  for (const point of allPoints) {
     const pointComponent = new Point(point);
     const editPointComponent = new EditPoint(point);
 
@@ -35,7 +41,7 @@ const renderTripPoints = (dist, allPoints) => {
     };
 
     editPointComponent.onSave = (newObject) => {
-      const updatedPoint = updatePoint(allPoints, i, newObject);
+      const updatedPoint = updatePoint(allPoints, point, newObject);
 
       pointComponent.update(updatedPoint);
       pointComponent.render();
@@ -47,6 +53,12 @@ const renderTripPoints = (dist, allPoints) => {
       pointComponent.render();
       dist.replaceChild(pointComponent.element, editPointComponent.element);
       editPointComponent.unrender();
+    };
+
+    editPointComponent.onDelete = () => {
+      dist.removeChild(editPointComponent.element);
+      editPointComponent.unrender();
+      deletePoint(allPoints, point);
     };
 
     pointFragment.appendChild(pointComponent.render());

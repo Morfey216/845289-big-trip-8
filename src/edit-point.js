@@ -18,8 +18,10 @@ export default class EditPoint extends PointComponent {
 
     this._onSave = null;
     this._onReset = null;
+    this._onDelete = null;
 
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
+    this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onEscKeydown = this._onEscKeydown.bind(this);
     this._onChangeDate = this._onChangeDate.bind(this);
     this._onChangeFavorit = this._onChangeFavorit.bind(this);
@@ -78,6 +80,12 @@ export default class EditPoint extends PointComponent {
     this.update(newData);
   }
 
+  _onDeleteButtonClick() {
+    if (typeof this._onDelete === `function`) {
+      this._onDelete();
+    }
+  }
+
   _onEscKeydown(evt) {
     if (typeof this._onReset === `function`) {
       isEscEvent(evt, this._onReset);
@@ -96,6 +104,10 @@ export default class EditPoint extends PointComponent {
 
   set onReset(fn) {
     this._onReset = fn;
+  }
+
+  set onDelete(fn) {
+    this._onDelete = fn;
   }
 
   get template() {
@@ -197,12 +209,14 @@ export default class EditPoint extends PointComponent {
 
   bind() {
     this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick);
+    this._element.querySelectorAll(`.point__button`)[1].addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.point__favorite-input`).addEventListener(`click`, this._onChangeFavorit);
   }
 
   unbind() {
     this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick);
+    this._element.querySelectorAll(`.point__button`)[1].removeEventListener(`click`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.point__favorite-input`).removeEventListener(`click`, this._onChangeFavorit);
   }
