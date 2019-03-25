@@ -38,7 +38,7 @@ export default class Point extends PointComponent {
       <h3 class="trip-point__title">${this._type.title} to ${this._place}</h3>
       <p class="trip-point__schedule">
         <span class="trip-point__timetable">${moment(this._schedule.startTime).format(`HH:mm`)}&nbsp;&mdash; ${moment(this._schedule.endTime).format(`HH:mm`)}</span>
-        <span class="trip-point__duration">${this._getDuration().hours()}h: ${this._getDuration().minutes()}m</span>
+        <span class="trip-point__duration">${this._getDuration().days()}d: ${this._getDuration().hours()}h: ${this._getDuration().minutes()}m</span>
       </p>
       <p class="trip-point__price">&euro;&nbsp;${this._price}</p>
       <ul class="trip-point__offers">

@@ -112,22 +112,9 @@ const createSchedule = () => {
   const range = (getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 + getNumberFromRange(TIME_INTERVAL.MIN_MINUTE, TIME_INTERVAL.MAX_MINUTE)) * 60 * 1000;
   const end = start + range;
 
-  // const options = {
-  //   hour12: false,
-  //   hour: `numeric`,
-  //   minute: `numeric`
-  // };
-
-  // return ({
-  //   startTime: new Intl.DateTimeFormat(`en-US`, options).format(start),
-  //   endTime: new Intl.DateTimeFormat(`en-US`, options).format(end),
-  //   duration: new Intl.DateTimeFormat(`en-US`, options).format(end - start)
-  // });
-
   return ({
     startTime: start,
-    endTime: end,
-    duration: range
+    endTime: end
   });
 };
 
@@ -159,13 +146,6 @@ const createDescription = () => {
 };
 
 const createCurrentType = () => {
-  // const typeNames = Object.keys(TYPES);
-  // const type = getNumberFromRange(0, TYPES.length - 1);
-
-  // return ({
-  //   title: type,
-  //   icon: TYPES[type]
-  // });
   return TYPES[getNumberFromRange(0, TYPES.length - 1)];
 };
 
