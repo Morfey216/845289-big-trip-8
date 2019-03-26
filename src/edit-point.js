@@ -66,11 +66,7 @@ export default class EditPoint extends PointComponent {
       for (const currentOffer of currentOffers) {
         const selectedOffer = determineIfOfferIsSelected(currentOffer.name);
 
-        if (selectedOffer) {
-          currentOffer.active = true;
-        } else {
-          currentOffer.active = false;
-        }
+        currentOffer.active = !!selectedOffer;
         newOffers.push(currentOffer);
       }
       return newOffers;
