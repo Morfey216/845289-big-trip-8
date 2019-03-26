@@ -29,7 +29,6 @@ export default class EditPoint extends PointComponent {
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onEscKeydown = this._onEscKeydown.bind(this);
-    this._onChangeFavorit = this._onChangeFavorit.bind(this);
     this._onSelectWay = this._onSelectWay.bind(this);
   }
 
@@ -88,6 +87,7 @@ export default class EditPoint extends PointComponent {
 
     const formData = new FormData(this._element.querySelector(`form`));
     const newData = this._processForm(formData);
+    this._state.isFavorite = this._element.querySelector(`.point__favorite-input`).checked;
 
     if (typeof this._onSave === `function`) {
       this._onSave(newData);
@@ -106,10 +106,6 @@ export default class EditPoint extends PointComponent {
     if (typeof this._onReset === `function`) {
       isEscEvent(evt, this._onReset);
     }
-  }
-
-  _onChangeFavorit() {
-    this._state.isFavorite = !this._state.isFavorite;
   }
 
   _onSelectWay(evt) {
@@ -256,7 +252,6 @@ export default class EditPoint extends PointComponent {
     this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick);
     this._element.querySelector(`.point__button--delete`).addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onEscKeydown);
-    this._element.querySelector(`.point__favorite-input`).addEventListener(`click`, this._onChangeFavorit);
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onSelectWay);
 
     const timeInput = this._element.querySelector(`.point__time input`);
@@ -286,7 +281,6 @@ export default class EditPoint extends PointComponent {
     this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick);
     this._element.querySelector(`.point__button--delete`).removeEventListener(`click`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onEscKeydown);
-    this._element.querySelector(`.point__favorite-input`).removeEventListener(`click`, this._onChangeFavorit);
     this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onSelectWay);
   }
 
