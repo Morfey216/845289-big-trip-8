@@ -21,12 +21,14 @@ export default class EditPoint extends PointComponent {
     this._onSave = null;
     this._onReset = null;
     this._onDelete = null;
+    this._newSchedule = {
+      startTime: ``,
+      endTime: ``
+    };
 
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onEscKeydown = this._onEscKeydown.bind(this);
-    // this._onChangeDate = this._onChangeDate.bind(this);
-    // this._onChangeTime = this._onChangeTime.bind(this);
     this._onChangeFavorit = this._onChangeFavorit.bind(this);
     this._onSelectWay = this._onSelectWay.bind(this);
   }
@@ -38,11 +40,11 @@ export default class EditPoint extends PointComponent {
         icon: `️`,
         group: ``
       },
-      // place: ``,
-      // schedule: {
-      //   startTime: new Date(),
-      //   endTime: new Date()
-      // },
+      place: ``,
+      schedule: {
+        startTime: ``,
+        endTime: ``
+      },
       price: ``,
       offers: []
     };
@@ -77,6 +79,7 @@ export default class EditPoint extends PointComponent {
 
     entry.offers = createNewOffers();
     entry.type = this._getNewType(entry.type.title);
+    entry.schedule = this._getNewSchedule();
     return entry;
   }
 
@@ -118,18 +121,26 @@ export default class EditPoint extends PointComponent {
 
   _getNewType(title) {
     const types = this._types;
-    const index = types.findIndex((it) => it.title === title);
+    const index = types.findIndex((it) => it.title.toLowerCase() === title);
     return types[index];
+  }
+
+  _getNewSchedule() {
+    if (this._newSchedule.startTime !== ``) {
+      this._schedule = this._newSchedule;
+      this._newSchedule = {
+        startTime: ``,
+        endTime: ``
+      };
+    }
+    return this._schedule;
   }
 
   _onChangeDate() {}
 
-  _onChangeTime() {
-    // this._schedule.duration = this._getDuration();
-  }
-
-  _getDuration() {
-    return moment.duration(moment(this._schedule.endTime).diff(moment(this._schedule.startTime)));
+  _setNewSchedule(schedule) {
+    this._newSchedule.startTime = schedule[0];
+    this._newSchedule.endTime = schedule[1];
   }
 
   set onSave(fn) {
@@ -205,7 +216,7 @@ export default class EditPoint extends PointComponent {
 
       <div class="point__buttons">
         <button class="point__button point__button--save" type="submit">Save</button>
-        <button class="point__button" type="reset">Delete</button>
+        <button class="point__button point__button--delete" type="reset">Delete</button>
       </div>
 
       <div class="paint__favorite-wrap">
@@ -243,7 +254,7 @@ export default class EditPoint extends PointComponent {
 
   bind() {
     this._element.querySelector(`.point__button--save`).addEventListener(`click`, this._onSaveButtonClick);
-    this._element.querySelectorAll(`.point__button`)[1].addEventListener(`click`, this._onDeleteButtonClick);
+    this._element.querySelector(`.point__button--delete`).addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.point__favorite-input`).addEventListener(`click`, this._onChangeFavorit);
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onSelectWay);
@@ -264,8 +275,7 @@ export default class EditPoint extends PointComponent {
             rangeSeparator: ` - `
           },
           onClose: (selectedDates) => {
-            this._schedule.startTime = selectedDates[0];
-            this._schedule.endTime = selectedDates[1];
+            this._setNewSchedule(selectedDates);
           },
           [`time_24hr`]: true
         }
@@ -274,20 +284,18 @@ export default class EditPoint extends PointComponent {
 
   unbind() {
     this._element.querySelector(`.point__button--save`).removeEventListener(`click`, this._onSaveButtonClick);
-    this._element.querySelectorAll(`.point__button`)[1].removeEventListener(`click`, this._onDeleteButtonClick);
+    this._element.querySelector(`.point__button--delete`).removeEventListener(`click`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.point__favorite-input`).removeEventListener(`click`, this._onChangeFavorit);
     this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onSelectWay);
-    // this._element.querySelector(`.point__time input`).removeEventListener(`click`, this._onChangeTime);
   }
 
   update(data) {
     this._type = data.type;
-    // this._place = data.place;
-    // this._schedule = data.schedule;
+    this._place = data.place;
+    this._schedule = data.schedule;
     this._price = data.price;
     this._offers = data.offers;
-    // this._description = data.description;
   }
 
   static createMapper(target) {
@@ -300,9 +308,9 @@ export default class EditPoint extends PointComponent {
 
     return {
       'travel-way': (value) => (target.type.title = value),
+      'destination': (value) => (target.place = value),
       'offer': (value) => target.offers.push(offerValueToName[value]),
       'price': (value) => (target.price = value),
-      // time: (value) => (target.schedule = value),
     };
   }
 }
