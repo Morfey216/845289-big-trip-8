@@ -259,8 +259,8 @@ export default class EditPoint extends PointComponent {
           mode: `range`,
           enableTime: true,
           altInput: true,
-          altFormat: `j n H:i`,
-          dateFormat: `j n H:i`,
+          altFormat: `j.m H:i`,
+          dateFormat: `j.m H:i`,
           defaultDate: [time.startTime, time.endTime],
           locale: {
             rangeSeparator: ` - `
