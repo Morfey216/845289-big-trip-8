@@ -1,6 +1,6 @@
 import {
-  getNumberFromRange,
-  getItemsFromArray
+  getRandomInteger,
+  getItemsList
 } from './random.js';
 
 const TIME_INTERVAL = {
@@ -25,18 +25,58 @@ const PICTURES_INTERVAL = {
   MAX: 4
 };
 
-const TYPES = {
-  'Taxi': `🚕`,
-  'Bus': `🚌`,
-  'Train': `🚂`,
-  'Ship': `🛳️`,
-  'Transport': `🚊`,
-  'Drive': `🚗`,
-  'Flight': `✈️`,
-  'Check-in': `🏨`,
-  'Sightseeing': `🏛️`,
-  'Restaurant': `🍴`
-};
+const TYPES = [
+  {
+    title: `Taxi`,
+    icon: `🚕`,
+    group: `transport`
+  },
+  {
+    title: `Bus`,
+    icon: `🚌`,
+    group: `transport`
+  },
+  {
+    title: `Train`,
+    icon: `🚂`,
+    group: `transport`
+  },
+  {
+    title: `Ship`,
+    icon: `🛳️`,
+    group: `transport`
+  },
+  {
+    title: `Transport`,
+    icon: `🚊`,
+    group: `transport`
+  },
+  {
+    title: `Drive`,
+    icon: `🚗`,
+    group: `transport`
+  },
+  {
+    title: `Flight`,
+    icon: `✈️`,
+    group: `transport`
+  },
+  {
+    title: `Check-in`,
+    icon: `🏨`,
+    group: `service`
+  },
+  {
+    title: `Sightseeing`,
+    icon: `🏛️`,
+    group: `service`
+  },
+  {
+    title: `Restaurant`,
+    icon: `🍴`,
+    group: `service`
+  }
+];
 
 const DESCRIPTIONS = [
   `Lorem ipsum dolor sit amet, consectetur adipiscing elit.`,
@@ -59,7 +99,7 @@ const OFFERS = [
   `Choose seats`
 ];
 
-const CITIES = [
+const PLACES = [
   `Amsterdam`,
   `Geneva`,
   `Chamonix`,
@@ -68,29 +108,29 @@ const CITIES = [
 ];
 
 const createSchedule = () => {
-  const start = Date.now() + getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 * 60 * 1000;
-  const end = start + (getNumberFromRange(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 + getNumberFromRange(TIME_INTERVAL.MIN_MINUTE, TIME_INTERVAL.MAX_MINUTE)) * 60 * 1000;
-
-  const options = {
-    hour12: false,
-    hour: `numeric`,
-    minute: `numeric`
-  };
+  const start = Date.now() + getRandomInteger(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 * 60 * 1000;
+  const range = (getRandomInteger(TIME_INTERVAL.MIN_HOUR, TIME_INTERVAL.MAX_HOUR) * 60 + getRandomInteger(TIME_INTERVAL.MIN_MINUTE, TIME_INTERVAL.MAX_MINUTE)) * 60 * 1000;
+  const end = start + range;
 
   return ({
-    startTime: new Intl.DateTimeFormat(`en-US`, options).format(start),
-    endTime: new Intl.DateTimeFormat(`en-US`, options).format(end),
-    duration: new Intl.DateTimeFormat(`en-US`, options).format(end - start)
+    startTime: start,
+    endTime: end
   });
+};
+
+const initOfferActive = () => {
+  const active = getRandomInteger();
+  return active % 2 ? true : false;
 };
 
 const createOffer = (currentOffer) => ({
   name: currentOffer,
-  price: getNumberFromRange()
+  price: getRandomInteger(),
+  active: initOfferActive()
 });
 
 const createOffers = () => {
-  const offersName = getItemsFromArray(OFFERS.slice(), getNumberFromRange(OFFERS_INTERVAL.MIN, OFFERS_INTERVAL.MAX + 1));
+  const offersName = getItemsList(OFFERS.slice(), getRandomInteger(OFFERS_INTERVAL.MIN, OFFERS_INTERVAL.MAX + 1));
   const offers = [];
 
   for (const offer of offersName) {
@@ -101,24 +141,18 @@ const createOffers = () => {
 };
 
 const createDescription = () => {
-  const numberOfSentences = getNumberFromRange(DESCRIPTIONS_INTERVAL.MIN, DESCRIPTIONS_INTERVAL.MAX + 1);
-  return getItemsFromArray(DESCRIPTIONS.slice(), numberOfSentences).join(` `);
+  const numberOfSentences = getRandomInteger(DESCRIPTIONS_INTERVAL.MIN, DESCRIPTIONS_INTERVAL.MAX + 1);
+  return getItemsList(DESCRIPTIONS.slice(), numberOfSentences).join(` `);
 };
 
 const createCurrentType = () => {
-  const typeNames = Object.keys(TYPES);
-  const type = typeNames[getNumberFromRange(0, typeNames.length - 1)];
-
-  return ({
-    title: type,
-    icon: TYPES[type]
-  });
+  return TYPES[getRandomInteger(0, TYPES.length - 1)];
 };
 
-const createPlace = () => CITIES[getNumberFromRange(0, CITIES.length - 1)];
+const createPlace = () => PLACES[getRandomInteger(0, PLACES.length - 1)];
 
 const createPictures = () => {
-  const numberOfPictures = getNumberFromRange(PICTURES_INTERVAL.MIN, PICTURES_INTERVAL.MAX + 1);
+  const numberOfPictures = getRandomInteger(PICTURES_INTERVAL.MIN, PICTURES_INTERVAL.MAX + 1);
   const pictures = [];
   for (let i = 0; i < numberOfPictures; i++) {
     pictures.push(`http://picsum.photos/300/150?r=${Math.random()}`);
@@ -131,8 +165,10 @@ export default () => ({
   type: createCurrentType(),
   place: createPlace(),
   schedule: createSchedule(),
-  price: getNumberFromRange(),
+  price: getRandomInteger(),
   offers: createOffers(),
   description: createDescription(),
-  pictures: createPictures()
+  pictures: createPictures(),
+  types: TYPES,
+  destinations: PLACES
 });

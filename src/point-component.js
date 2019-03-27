@@ -33,4 +33,6 @@ export default class PointComponent {
     this._element.remove();
     this._element = null;
   }
+
+  update() {}
 }

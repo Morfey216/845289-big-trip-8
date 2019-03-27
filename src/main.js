@@ -14,12 +14,25 @@ filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Everything`, true));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
 filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
-const renderTripPoints = (dist, allPoints) => {
+const updatePointData = (points, pointToUpdate, newPoint) => {
+  const index = points.findIndex((it) => it === pointToUpdate);
+  points[index] = Object.assign({}, pointToUpdate, newPoint);
+  return points[index];
+};
+
+const deletePointData = (points, point) => {
+  const index = points.findIndex((it) => it === point);
+  points.splice(index, 1);
+  return points;
+};
+
+const renderTripPoints = (dist, allPointsData) => {
+  tripPointsPosition.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
-  for (const point of allPoints) {
-    const pointComponent = new Point(point);
-    const editPointComponent = new EditPoint(point);
+  for (const itPointData of allPointsData) {
+    const pointComponent = new Point(itPointData);
+    const editPointComponent = new EditPoint(itPointData);
 
     pointComponent.onEdit = () => {
       editPointComponent.render();
@@ -27,7 +40,10 @@ const renderTripPoints = (dist, allPoints) => {
       pointComponent.unrender();
     };
 
-    editPointComponent.onSave = () => {
+    editPointComponent.onSave = (newObject) => {
+      const updatedPoint = updatePointData(allPointsData, itPointData, newObject);
+
+      pointComponent.update(updatedPoint);
       pointComponent.render();
       dist.replaceChild(pointComponent.element, editPointComponent.element);
       editPointComponent.unrender();
@@ -37,6 +53,12 @@ const renderTripPoints = (dist, allPoints) => {
       pointComponent.render();
       dist.replaceChild(pointComponent.element, editPointComponent.element);
       editPointComponent.unrender();
+    };
+
+    editPointComponent.onDelete = () => {
+      dist.removeChild(editPointComponent.element);
+      editPointComponent.unrender();
+      deletePointData(allPointsData, itPointData);
     };
 
     pointFragment.appendChild(pointComponent.render());

@@ -1,11 +1,13 @@
-export const getNumberFromRange = (minNumber = 1, maxNumber = 100) => Math.floor(Math.random() * (maxNumber - minNumber)) + minNumber;
+export const getRandomInteger = (minNumber = 1, maxNumber = 100) => Math.floor(Math.random() * (maxNumber - minNumber)) + minNumber;
 
-export const getItemsFromArray = (array, number) => {
-  const resultArray = [];
+export const getItemsList = (array, number) => {
+  const resultList = [];
 
-  for (let i = 0; i < number; i++) {
-    resultArray.push(array.splice(getNumberFromRange(0, array.length), 1)[0]);
+  while (resultList.length < number) {
+    const randomItemIndex = getRandomInteger(0, array.length);
+    const newItem = array.splice(randomItemIndex, 1)[0];
+    resultList.push(newItem);
   }
 
-  return resultArray;
+  return resultList;
 };
