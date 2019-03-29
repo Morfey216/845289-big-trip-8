@@ -1,18 +1,23 @@
-import makeFilter from './make-filter.js';
-// import makePoint from './make-point.js';
 import pointData from './get-point-data.js';
+import filtersData from './filters-data.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
+import Filter from './filter.js';
 
 const START_AMOUNT_OF_POINTS = 7;
-const MAX_RANDOM_OF_POINTS = 15;
 
-const filtersPosition = document.querySelector(`.trip-filter`);
+const filtersForm = document.querySelector(`.trip-filter`);
 const tripPointsPosition = document.querySelector(`.trip-day__items`);
 
-filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Everything`, true));
-filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
-filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
+const renderFilters = (allFiltersData) => {
+  filtersForm.innerHTML = ``;
+
+  for (const itFilterData of allFiltersData) {
+    const filterComponent = new Filter(itFilterData);
+
+    filtersForm.insertAdjacentHTML(`beforeend`, filterComponent.render());
+  }
+};
 
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
@@ -72,34 +77,25 @@ const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
 const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
 
 renderTripPoints(tripPointsPosition, tripPoints);
+renderFilters(filtersData());
 
-const clearTripPoints = () => {
-  while (tripPointsPosition.firstChild) {
-    tripPointsPosition.removeChild(tripPointsPosition.firstChild);
+const filteredPoints = (points, filter) => {
+  let newTripPoints;
+  switch (filter) {
+    case `filter-everything`:
+      newTripPoints = points;
+      break;
+    case `filter-future`:
+      newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
+      break;
+    case `filter-past`:
+      newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
+      break;
   }
+  renderTripPoints(tripPointsPosition, newTripPoints);
 };
 
-const initFilterButton = (filterButton) => {
-  const onFilterButtonClick = () => {
-    let newTripPoints;
-    switch (filterButton.id) {
-      case `filter-everything`:
-        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        break;
-      case `filter-future`:
-        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        break;
-      case `filter-past`:
-        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        break;
-    }
-    clearTripPoints();
-    renderTripPoints(tripPointsPosition, newTripPoints);
-  };
-
-  filterButton.addEventListener(`click`, onFilterButtonClick);
+filtersForm.onchange = (evt) => {
+  const filterName = evt.target.id;
+  filteredPoints(tripPoints, filterName);
 };
-
-const filterButtons = filtersPosition.querySelectorAll(`input`);
-
-filterButtons.forEach(initFilterButton);

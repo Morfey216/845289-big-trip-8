@@ -1,9 +1,9 @@
 import moment from 'moment';
 import flatpickr from 'flatpickr';
-import PointComponent from './point-component.js';
+import Component from './component.js';
 import isEscEvent from './util.js';
 
-export default class EditPoint extends PointComponent {
+export default class EditPoint extends Component {
   constructor(data) {
     super();
     this._type = data.type;

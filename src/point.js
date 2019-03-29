@@ -1,7 +1,7 @@
 import moment from 'moment';
-import PointComponent from './point-component.js';
+import Component from './component.js';
 
-export default class Point extends PointComponent {
+export default class Point extends Component {
   constructor(data) {
     super();
     this._type = data.type;
