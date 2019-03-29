@@ -15,7 +15,13 @@ const renderFilters = (allFiltersData) => {
   for (const itFilterData of allFiltersData) {
     const filterComponent = new Filter(itFilterData);
 
-    filtersForm.insertAdjacentHTML(`beforeend`, filterComponent.render());
+    filterComponent.onFilter = (evt) => {
+      const filterCaption = evt.target.id || evt.target.htmlFor;
+      filteredPoints(tripPoints, filterCaption);
+    };
+
+    const filterElement = filterComponent.render();
+    filtersForm.appendChild(filterElement);
   }
 };
 
@@ -93,9 +99,4 @@ const filteredPoints = (points, filter) => {
       break;
   }
   renderTripPoints(tripPointsPosition, newTripPoints);
-};
-
-filtersForm.onchange = (evt) => {
-  const filterName = evt.target.id;
-  filteredPoints(tripPoints, filterName);
 };

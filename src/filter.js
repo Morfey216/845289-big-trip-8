@@ -5,10 +5,29 @@ export default class Filter extends Component {
     super();
     this._caption = data.caption;
     this._checked = data.checked;
+
+    this._onFilter = null;
+    this._onFilterClick = this._onFilterClick.bind(this);
+  }
+
+  _onFilterClick(evt) {
+    evt.preventDefault();
+
+    if (typeof this._onFilter === `function`) {
+      this._onFilter(evt);
+    }
+
+    this._element.querySelector(`input`).checked = `checked`;
+    this._checked = true;
+  }
+
+  set onFilter(fn) {
+    this._onFilter = fn;
   }
 
   get template() {
     return `
+    <span>
     <input type="radio" 
     id="filter-${this._caption.toLowerCase()}" 
     name="filter" 
@@ -17,11 +36,15 @@ export default class Filter extends Component {
     <label class="trip-filter__item" 
     for="filter-${this._caption.toLowerCase()}">
     ${this._caption}
-    </label>`;
+    </label>
+    </span>`.trim();
   }
 
-  render() {
-    this._element = this.template;
-    return this._element;
+  bind() {
+    this._element.addEventListener(`click`, this._onFilterClick, false);
+  }
+
+  unbind() {
+    this._element.removeEventListener(`click`, this._onFilterClick);
   }
 }
