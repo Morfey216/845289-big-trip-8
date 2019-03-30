@@ -240,5 +240,7 @@ export default class Statistic extends Component {
     this._moneyChart.data.datasets[0].data = this._moneyData.data;
     this._transportChart.data.labels = this._transportData.labels;
     this._transportChart.data.datasets[0].data = this._transportData.data;
+    this._moneyChart.update();
+    this._transportChart.update();
   }
 }
