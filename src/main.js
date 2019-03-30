@@ -1,18 +1,14 @@
-import makeFilter from './make-filter.js';
-// import makePoint from './make-point.js';
 import pointData from './get-point-data.js';
+import filtersData from './filters-data.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
+import Filter from './filter.js';
+import Statistic from './statistic.js';
 
 const START_AMOUNT_OF_POINTS = 7;
-const MAX_RANDOM_OF_POINTS = 15;
 
-const filtersPosition = document.querySelector(`.trip-filter`);
+const filtersForm = document.querySelector(`.trip-filter`);
 const tripPointsPosition = document.querySelector(`.trip-day__items`);
-
-filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Everything`, true));
-filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Future`));
-filtersPosition.insertAdjacentHTML(`beforeend`, makeFilter(`Past`));
 
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
@@ -26,11 +22,11 @@ const deletePointData = (points, point) => {
   return points;
 };
 
-const renderTripPoints = (dist, allPointsData) => {
+const renderTripPoints = (dist, allPointsData, filteredPointData) => {
   tripPointsPosition.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
-  for (const itPointData of allPointsData) {
+  for (const itPointData of filteredPointData) {
     const pointComponent = new Point(itPointData);
     const editPointComponent = new EditPoint(itPointData);
 
@@ -67,39 +63,76 @@ const renderTripPoints = (dist, allPointsData) => {
   dist.appendChild(pointFragment);
 };
 
-const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
+const filteredPoints = (points, filter) => {
+  let newTripPoints;
+  switch (filter) {
+    case `filter-everything`:
+      newTripPoints = points;
+      break;
+    case `filter-future`:
+      newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
+      break;
+    case `filter-past`:
+      newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
+      break;
+  }
+  renderTripPoints(tripPointsPosition, points, newTripPoints);
+};
 
-const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
+const renderFilters = (allFiltersData) => {
+  filtersForm.innerHTML = ``;
 
-renderTripPoints(tripPointsPosition, tripPoints);
+  for (const itFilterData of allFiltersData) {
+    const filterComponent = new Filter(itFilterData);
 
-const clearTripPoints = () => {
-  while (tripPointsPosition.firstChild) {
-    tripPointsPosition.removeChild(tripPointsPosition.firstChild);
+    filterComponent.onFilter = (evt) => {
+      const filterCaption = evt.target.htmlFor;
+      filteredPoints(tripPoints, filterCaption);
+    };
+
+    const filterElement = filterComponent.render();
+    filtersForm.appendChild(filterElement);
   }
 };
 
-const initFilterButton = (filterButton) => {
-  const onFilterButtonClick = () => {
-    let newTripPoints;
-    switch (filterButton.id) {
-      case `filter-everything`:
-        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        break;
-      case `filter-future`:
-        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        break;
-      case `filter-past`:
-        newTripPoints = getTripPoints(Math.floor(Math.random() * MAX_RANDOM_OF_POINTS));
-        break;
-    }
-    clearTripPoints();
-    renderTripPoints(tripPointsPosition, newTripPoints);
-  };
+const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
+const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
 
-  filterButton.addEventListener(`click`, onFilterButtonClick);
+renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
+renderFilters(filtersData());
+
+const mainSection = document.querySelector(`.main`);
+
+const statistic = new Statistic(tripPoints);
+mainSection.parentNode.appendChild(statistic.render());
+
+const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
+const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
+const statisticSection = document.querySelector(`.statistic`);
+
+const onTableButtonClick = (evt) => {
+  evt.preventDefault();
+
+  tableButton.classList.add(`view-switch__item--active`);
+  statisticButton.classList.remove(`view-switch__item--active`);
+
+  mainSection.classList.remove(`visually-hidden`);
+  statisticSection.classList.add(`visually-hidden`);
+
+  renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
 };
 
-const filterButtons = filtersPosition.querySelectorAll(`input`);
+const onStatisticButtonClick = (evt) => {
+  evt.preventDefault();
 
-filterButtons.forEach(initFilterButton);
+  tableButton.classList.remove(`view-switch__item--active`);
+  statisticButton.classList.add(`view-switch__item--active`);
+
+  mainSection.classList.add(`visually-hidden`);
+  statisticSection.classList.remove(`visually-hidden`);
+
+  statistic.renderCharts();
+};
+
+tableButton.addEventListener(`click`, onTableButtonClick);
+statisticButton.addEventListener(`click`, onStatisticButtonClick);

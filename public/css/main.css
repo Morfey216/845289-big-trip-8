@@ -448,8 +448,8 @@ input[type=radio]:checked + .trip-sorting__item {
 }
 .point__time {
   font-size: 0;
-  width: 130px;
-  margin-right: 40px;
+  width: auto;
+  margin-right: 25px;
   display: flex;
 }
 .point__time .point__input {

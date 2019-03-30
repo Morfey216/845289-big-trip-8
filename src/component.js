@@ -1,8 +1,8 @@
 import createElement from './create-element.js';
 
-export default class PointComponent {
+export default class Component {
   constructor() {
-    if (new.target === PointComponent) {
+    if (new.target === Component) {
       throw new Error(`Can't instantiate BaseComponent, only concrete one.`);
     }
 
