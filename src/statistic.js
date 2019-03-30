@@ -2,11 +2,40 @@ import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Component from './component.js';
 
+const getTransportData = (pointsData) => {
+  let dataForTransportChart = {
+    labels: [],
+    data: []
+  };
+
+  const pointsTypes = pointsData[0].types;
+  const transportTypes = pointsTypes.filter((it) => it.group === `transport`);
+
+  for (const transportType of transportTypes) {
+    let count = 0;
+
+    for (const pointData of pointsData) {
+      if (pointData.type.title === transportType.title) {
+        count = count + 1;
+      }
+    }
+
+    if (count) {
+      dataForTransportChart.labels.push(`${transportType.icon} ${transportType.title}`);
+      dataForTransportChart.data.push(count);
+    }
+  }
+
+  return dataForTransportChart;
+};
+
 export default class Statistic extends Component {
   constructor(data) {
     super();
     this._barHeight = 55;
     this._data = data;
+
+    this._transportData = null;
 
     this._chart = null;
     this._moneyCtx = null;
@@ -36,6 +65,9 @@ export default class Statistic extends Component {
     this._moneyCtx = this._element.querySelector(`.statistic__money`);
     this._transportCtx = this._element.querySelector(`.statistic__transport`);
     this._timeSpendCtx = this._element.querySelector(`.statistic__time-spend`);
+
+    this._transportData = getTransportData(this._data);
+    this._transportCtx.height = this._barHeight * this._transportData.labels.length;
 
     this._moneyChart = new Chart(this._moneyCtx, {
       plugins: [ChartDataLabels],
@@ -106,9 +138,9 @@ export default class Statistic extends Component {
       plugins: [ChartDataLabels],
       type: `horizontalBar`,
       data: {
-        labels: [`🚗 DRIVE`, `🚕 RIDE`, `✈️ FLY`, `🛳️ SAIL`],
+        labels: this._transportData.labels,
         datasets: [{
-          data: [4, 3, 2, 1],
+          data: this._transportData.data,
           backgroundColor: `#ffffff`,
           hoverBackgroundColor: `#ffffff`,
           anchor: `start`
