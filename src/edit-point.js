@@ -130,10 +130,10 @@ export default class EditPoint extends Component {
 
   _onChangeDate() {}
 
-  _setNewSchedule(schedule) {
-    this._newSchedule.startTime = schedule[0];
-    this._newSchedule.endTime = schedule[1];
-  }
+  // _setNewSchedule(schedule) {
+  //   this._newSchedule.startTime = schedule[0];
+  //   this._newSchedule.endTime = schedule[1];
+  // }
 
   set onSave(fn) {
     this._onSave = fn;
@@ -195,10 +195,11 @@ export default class EditPoint extends Component {
         </datalist>
       </div>
 
-      <label class="point__time">
+      <div class="point__time">
         choose time
-        <input class="point__input" type="text" value="${moment(this._schedule.startTime).format(`HH:mm`)}&nbsp;&mdash; ${moment(this._schedule.endTime).format(`HH:mm`)}" name="time" placeholder="00:00 — 00:00">
-      </label>
+        <input class="point__input" type="text" value="${moment(this._schedule.startTime).format(`HH:mm`)}" name="date-start" placeholder="19:00"><span>&nbsp;&mdash;&nbsp;</span>
+        <input class="point__input" type="text" value="${moment(this._schedule.endTime).format(`HH:mm`)}" name="date-end" placeholder="21:00">
+      </div>
 
       <label class="point__price">
         write price
@@ -250,23 +251,41 @@ export default class EditPoint extends Component {
     document.addEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onSelectWay);
 
-    const timeInput = this._element.querySelector(`.point__time input`);
+    const startTimeInput = this._element.querySelector(`.point__time input[name="date-start"]`);
+    const endTimeInput = this._element.querySelector(`.point__time input[name="date-end"]`);
     const time = this._schedule;
 
     flatpickr(
-        timeInput,
+        startTimeInput,
         {
-          mode: `range`,
           enableTime: true,
           altInput: true,
-          altFormat: `j.m H:i`,
-          dateFormat: `j.m H:i`,
-          defaultDate: [time.startTime, time.endTime],
+          altFormat: `H:i`,
+          dateFormat: `H:i`,
+          defaultDate: [time.startTime],
           locale: {
             rangeSeparator: ` - `
           },
           onClose: (selectedDates) => {
-            this._setNewSchedule(selectedDates);
+            this._newSchedule.startTime = selectedDates[0];
+          },
+          [`time_24hr`]: true
+        }
+    );
+
+    flatpickr(
+        endTimeInput,
+        {
+          enableTime: true,
+          altInput: true,
+          altFormat: `H:i`,
+          dateFormat: `H:i`,
+          defaultDate: [time.endTime],
+          locale: {
+            rangeSeparator: ` - `
+          },
+          onClose: (selectedDates) => {
+            this._newSchedule.endTime = selectedDates[0];
           },
           [`time_24hr`]: true
         }
