@@ -3,6 +3,7 @@ import filtersData from './filters-data.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
 import Filter from './filter.js';
+import Statistic from './statistic.js';
 
 const START_AMOUNT_OF_POINTS = 7;
 
@@ -95,8 +96,43 @@ const renderFilters = (allFiltersData) => {
 };
 
 const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
-
 const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
 
 renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
 renderFilters(filtersData());
+
+const mainSection = document.querySelector(`.main`);
+
+const statistic = new Statistic(tripPoints);
+mainSection.parentNode.appendChild(statistic.render());
+
+const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
+const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
+const statisticSection = document.querySelector(`.statistic`);
+
+const onTableButtonClick = (evt) => {
+  evt.preventDefault();
+
+  tableButton.classList.add(`view-switch__item--active`);
+  statisticButton.classList.remove(`view-switch__item--active`);
+
+  mainSection.classList.remove(`visually-hidden`);
+  statisticSection.classList.add(`visually-hidden`);
+
+  renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
+};
+
+const onStatisticButtonClick = (evt) => {
+  evt.preventDefault();
+
+  tableButton.classList.remove(`view-switch__item--active`);
+  statisticButton.classList.add(`view-switch__item--active`);
+
+  mainSection.classList.add(`visually-hidden`);
+  statisticSection.classList.remove(`visually-hidden`);
+
+  statistic.renderCharts();
+};
+
+tableButton.addEventListener(`click`, onTableButtonClick);
+statisticButton.addEventListener(`click`, onStatisticButtonClick);
