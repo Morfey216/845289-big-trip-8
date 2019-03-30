@@ -130,8 +130,8 @@ const onStatisticButtonClick = (evt) => {
 
   mainSection.classList.add(`visually-hidden`);
   statisticSection.classList.remove(`visually-hidden`);
-
   statistic.renderCharts();
+
 };
 
 tableButton.addEventListener(`click`, onTableButtonClick);
