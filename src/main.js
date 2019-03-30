@@ -9,22 +9,6 @@ const START_AMOUNT_OF_POINTS = 7;
 const filtersForm = document.querySelector(`.trip-filter`);
 const tripPointsPosition = document.querySelector(`.trip-day__items`);
 
-const renderFilters = (allFiltersData) => {
-  filtersForm.innerHTML = ``;
-
-  for (const itFilterData of allFiltersData) {
-    const filterComponent = new Filter(itFilterData);
-
-    filterComponent.onFilter = (evt) => {
-      const filterCaption = evt.target.id || evt.target.htmlFor;
-      filteredPoints(tripPoints, filterCaption);
-    };
-
-    const filterElement = filterComponent.render();
-    filtersForm.appendChild(filterElement);
-  }
-};
-
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
   points[index] = Object.assign({}, pointToUpdate, newPoint);
@@ -37,11 +21,11 @@ const deletePointData = (points, point) => {
   return points;
 };
 
-const renderTripPoints = (dist, allPointsData) => {
+const renderTripPoints = (dist, allPointsData, filteredPointData) => {
   tripPointsPosition.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
-  for (const itPointData of allPointsData) {
+  for (const itPointData of filteredPointData) {
     const pointComponent = new Point(itPointData);
     const editPointComponent = new EditPoint(itPointData);
 
@@ -78,13 +62,6 @@ const renderTripPoints = (dist, allPointsData) => {
   dist.appendChild(pointFragment);
 };
 
-const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
-
-const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
-
-renderTripPoints(tripPointsPosition, tripPoints);
-renderFilters(filtersData());
-
 const filteredPoints = (points, filter) => {
   let newTripPoints;
   switch (filter) {
@@ -98,5 +75,28 @@ const filteredPoints = (points, filter) => {
       newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
       break;
   }
-  renderTripPoints(tripPointsPosition, newTripPoints);
+  renderTripPoints(tripPointsPosition, points, newTripPoints);
 };
+
+const renderFilters = (allFiltersData) => {
+  filtersForm.innerHTML = ``;
+
+  for (const itFilterData of allFiltersData) {
+    const filterComponent = new Filter(itFilterData);
+
+    filterComponent.onFilter = (evt) => {
+      const filterCaption = evt.target.htmlFor;
+      filteredPoints(tripPoints, filterCaption);
+    };
+
+    const filterElement = filterComponent.render();
+    filtersForm.appendChild(filterElement);
+  }
+};
+
+const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
+
+const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
+
+renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
+renderFilters(filtersData());
