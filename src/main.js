@@ -77,6 +77,7 @@ const filteredPoints = (points, filter) => {
       break;
   }
   renderTripPoints(tripPointsPosition, points, newTripPoints);
+  statistic.update(newTripPoints);
 };
 
 const renderFilters = (allFiltersData) => {

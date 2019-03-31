@@ -197,7 +197,7 @@ export default class EditPoint extends Component {
 
       <div class="point__time">
         choose time
-        <input class="point__input" type="text" value="${moment(this._schedule.startTime).format(`HH:mm`)}" name="date-start" placeholder="19:00"><span>&nbsp;&mdash;&nbsp;</span>
+        <input class="point__input" type="text" value="${moment(this._schedule.startTime).format(`HH:mm`)}" name="date-start" placeholder="19:00">
         <input class="point__input" type="text" value="${moment(this._schedule.endTime).format(`HH:mm`)}" name="date-end" placeholder="21:00">
       </div>
 

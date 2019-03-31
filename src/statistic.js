@@ -232,9 +232,9 @@ export default class Statistic extends Component {
     });
   }
 
-  update() {
-    this._moneyData = getMoneyData(this._data);
-    this._transportData = getTransportData(this._data);
+  update(data) {
+    this._moneyData = getMoneyData(data);
+    this._transportData = getTransportData(data);
 
     this._moneyChart.data.labels = this._moneyData.labels;
     this._moneyChart.data.datasets[0].data = this._moneyData.data;
