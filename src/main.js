@@ -1,3 +1,4 @@
+import API from './api.js';
 import pointData from './get-point-data.js';
 import filtersData from './filters-data.js';
 import Point from './point.js';
@@ -5,10 +6,22 @@ import EditPoint from './edit-point.js';
 import Filter from './filter.js';
 import Statistic from './statistic.js';
 
+const AUTHORIZATION = `Basic eo0w590ik37599a${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 const START_AMOUNT_OF_POINTS = 7;
 
+const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+
+const mainSection = document.querySelector(`.main`);
+const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
+const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
 const filtersForm = document.querySelector(`.trip-filter`);
-const tripPointsPosition = document.querySelector(`.trip-day__items`);
+const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
+
+let destinationsKit = null;
+let offersKit = null;
+let tripPoints = [];
+let statistic = null;
 
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
@@ -22,8 +35,8 @@ const deletePointData = (points, point) => {
   return points;
 };
 
-const renderTripPoints = (dist, allPointsData, filteredPointData) => {
-  tripPointsPosition.innerHTML = ``;
+const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) => {
+  tripDayItemsBlock.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
   for (const itPointData of filteredPointData) {
@@ -63,32 +76,77 @@ const renderTripPoints = (dist, allPointsData, filteredPointData) => {
   dist.appendChild(pointFragment);
 };
 
-const filteredPoints = (points, filter) => {
-  let newTripPoints;
-  switch (filter) {
-    case `filter-everything`:
-      newTripPoints = points;
-      break;
-    case `filter-future`:
-      newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
-      break;
-    case `filter-past`:
-      newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
-      break;
-  }
-  renderTripPoints(tripPointsPosition, points, newTripPoints);
-  statistic.update(newTripPoints);
+tripDayItemsBlock.textContent = `Loading route...`;
+
+const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
+
+const getDestinationsKit = (kit) => {
+  destinationsKit = kit;
 };
 
-const renderFilters = (allFiltersData) => {
+const getOffersKit = (kit) => {
+  offersKit = kit;
+};
+
+const renderStatistic = (points) => {
+  statistic = new Statistic(points);
+  mainSection.parentNode.appendChild(statistic.render());
+
+  const statisticSection = document.querySelector(`.statistic`);
+
+  const onTableButtonClick = (evt) => {
+    evt.preventDefault();
+
+    tableButton.classList.add(`view-switch__item--active`);
+    statisticButton.classList.remove(`view-switch__item--active`);
+
+    mainSection.classList.remove(`visually-hidden`);
+    statisticSection.classList.add(`visually-hidden`);
+
+    renderTripPoints(tripDayItemsBlock, tripPoints);
+  };
+
+  const onStatisticButtonClick = (evt) => {
+    evt.preventDefault();
+
+    tableButton.classList.remove(`view-switch__item--active`);
+    statisticButton.classList.add(`view-switch__item--active`);
+
+    mainSection.classList.add(`visually-hidden`);
+    statisticSection.classList.remove(`visually-hidden`);
+
+    statistic.renderCharts();
+  };
+
+  tableButton.addEventListener(`click`, onTableButtonClick);
+  statisticButton.addEventListener(`click`, onStatisticButtonClick);
+};
+
+const renderFilters = (allFiltersData, allPoints) => {
   filtersForm.innerHTML = ``;
+
+  const filteredPoints = (points, filter) => {
+    let newTripPoints = [];
+    switch (filter) {
+      case `filter-everything`:
+        newTripPoints = points;
+        break;
+      case `filter-future`:
+        newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
+        break;
+      case `filter-past`:
+        newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
+        break;
+    }
+    renderTripPoints(tripDayItemsBlock, points, newTripPoints);
+  };
 
   for (const itFilterData of allFiltersData) {
     const filterComponent = new Filter(itFilterData);
 
     filterComponent.onFilter = (evt) => {
       const filterCaption = evt.target.htmlFor;
-      filteredPoints(tripPoints, filterCaption);
+      filteredPoints(allPoints, filterCaption);
     };
 
     const filterElement = filterComponent.render();
@@ -96,44 +154,31 @@ const renderFilters = (allFiltersData) => {
   }
 };
 
-const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
-const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
+const loadData = () => {
+  api.getDestinations()
+  .then((destinations) => {
+    getDestinationsKit(destinations);
+    // console.log(destinationsKit);
+  })
+  .then(() => {
+    api.getOffers()
+    .then((offers) => {
+      getOffersKit(offers);
+      // console.log(offersKit);
+    });
+  })
+  .then(() => {
+    api.getPoints()
+    .then((points) => {
+      // console.log(points);
+      tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
+      renderTripPoints(tripDayItemsBlock, tripPoints);
+      renderStatistic(tripPoints);
+      renderFilters(filtersData(), tripPoints);
+    });
+  });
 
-renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
-renderFilters(filtersData());
 
-const mainSection = document.querySelector(`.main`);
-
-const statistic = new Statistic(tripPoints);
-mainSection.parentNode.appendChild(statistic.render());
-
-const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
-const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
-const statisticSection = document.querySelector(`.statistic`);
-
-const onTableButtonClick = (evt) => {
-  evt.preventDefault();
-
-  tableButton.classList.add(`view-switch__item--active`);
-  statisticButton.classList.remove(`view-switch__item--active`);
-
-  mainSection.classList.remove(`visually-hidden`);
-  statisticSection.classList.add(`visually-hidden`);
-
-  renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
 };
 
-const onStatisticButtonClick = (evt) => {
-  evt.preventDefault();
-
-  tableButton.classList.remove(`view-switch__item--active`);
-  statisticButton.classList.add(`view-switch__item--active`);
-
-  mainSection.classList.add(`visually-hidden`);
-  statisticSection.classList.remove(`visually-hidden`);
-
-  statistic.renderCharts();
-};
-
-tableButton.addEventListener(`click`, onTableButtonClick);
-statisticButton.addEventListener(`click`, onStatisticButtonClick);
+loadData();

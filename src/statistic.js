@@ -2,6 +2,8 @@ import Chart from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Component from './component.js';
 
+const BAR_HEIGHT = 55;
+
 const getTransportData = (pointsData) => {
   const dataForTransportChart = {
     labels: [],
@@ -61,7 +63,7 @@ const getMoneyData = (pointsData) => {
 export default class Statistic extends Component {
   constructor(data) {
     super();
-    this._barHeight = 55;
+    this._barHeight = BAR_HEIGHT;
     this._data = data;
 
     this._transportData = null;
