@@ -156,7 +156,25 @@ const createType = (itPoint) => {
   return type;
 };
 
-const createFullTypesData = () => {
+const createOffersNameList = (kit) => {
+  const offersList = new Set();
+  kit.forEach((it) => {
+    it.offers.forEach((offer) => offersList.add(offer.name));
+  });
+
+  return [...offersList];
+};
+
+const createOffersLabelList = (namesKit) => {
+  const labelsKit = [];
+  namesKit.forEach((it) => {
+    labelsKit.push(it.toLowerCase().replace(/ /g, `-`).replace(/,/g, ``).replace(/'/g, `-`));
+  });
+
+  return labelsKit;
+};
+
+const createFullPointsData = () => {
   for (const currentOffer of offersKit) {
     const index = TYPES.findIndex((it) => it.title.toLowerCase() === currentOffer.type);
     currentOffer.title = TYPES[index].title;
@@ -165,13 +183,17 @@ const createFullTypesData = () => {
   }
 
   tripPoints.forEach((it) => {
+    it.destinations = destinationsKit;
     it.types = offersKit;
     it.type = createType(it);
+    it.offersNameKit = createOffersNameList(offersKit);
+    it.offersLabelKit = createOffersLabelList(it.offersNameKit);
   });
 };
 
 const initRender = () => {
-  createFullTypesData();
+  createFullPointsData();
+  console.log(tripPoints);
   renderTripPoints(tripDayItemsBlock, tripPoints);
   renderStatistic(tripPoints);
   renderFilters(filtersData(), tripPoints);

@@ -17,6 +17,8 @@ export default class EditPoint extends Component {
     this._pictures = data.pictures;
     this._types = data.types;
     this._destinations = data.destinations;
+    this._offersNameKit = data.offersNameKit;
+    this._offersLabelKit = data.offersLabelKit;
     this._isFavorite = data.isFavorite;
 
     // this._isFavorite = false;
@@ -64,7 +66,13 @@ export default class EditPoint extends Component {
 
     const createNewOffers = () => {
       const newOffers = [];
-      const determineIfOfferIsSelected = (offer) => entry.offers.some((it) => it === offer);
+      const newOffersName = [];
+
+      entry.offers.forEach((it) => {
+        newOffersName.push(this._getOfferName(it));
+      });
+
+      const determineIfOfferIsSelected = (offer) => newOffersName.some((it) => it === offer);
 
       for (const currentOffer of currentOffers) {
         const selectedOffer = determineIfOfferIsSelected(currentOffer.title);
@@ -131,6 +139,16 @@ export default class EditPoint extends Component {
     return this._schedule;
   }
 
+  _getOfferLabel(name) {
+    const index = this._offersNameKit.findIndex((it) => it === name);
+    return this._offersLabelKit[index];
+  }
+
+  _getOfferName(label) {
+    const index = this._offersLabelKit.findIndex((it) => it === label);
+    return this._offersNameKit[index];
+  }
+
   _onChangeDate() {}
 
   // _setNewSchedule(schedule) {
@@ -151,13 +169,6 @@ export default class EditPoint extends Component {
   }
 
   get template() {
-    const offerNameToValue = {
-      'Add luggage': `add-luggage`,
-      'Switch to comfort class': `switch-to-comfort-class`,
-      'Add meal': `add-meal`,
-      'Choose seats': `choose-seats`
-    };
-
     return `
     <article class="point">
   <form action="" method="get">
@@ -194,7 +205,7 @@ export default class EditPoint extends Component {
         <input class="point__destination-input" list="destination-select" id="destination" value="${this._place}" name="destination">
         <datalist id="destination-select">
           ${this._destinations.map((destination) => (
-    `<option value=${destination}></option>`)).join(``)}
+    `<option value=${destination.name}></option>`)).join(``)}
         </datalist>
       </div>
 
@@ -227,8 +238,8 @@ export default class EditPoint extends Component {
 
         <div class="point__offers-wrap">
           ${this._offers.map((offer) => (
-    `<input class="point__offers-input visually-hidden" type="checkbox" id=${offerNameToValue[offer.title]} name="offer" value=${offerNameToValue[offer.title]} ${offer.accepted ? `checked` : ``}>
-            <label for=${offerNameToValue[offer.title]} class="point__offers-label">
+    `<input class="point__offers-input visually-hidden" type="checkbox" id=${this._getOfferLabel(offer.title)} name="offer" value=${this._getOfferLabel(offer.title)} ${offer.accepted ? `checked` : ``}>
+            <label for=${this._getOfferLabel(offer.title)} class="point__offers-label">
             <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
           </label>`
   )).join(``)}
@@ -311,17 +322,10 @@ export default class EditPoint extends Component {
   }
 
   static createMapper(target) {
-    const offerValueToName = {
-      'add-luggage': `Add luggage`,
-      'switch-to-comfort-class': `Switch to comfort class`,
-      'add-meal': `Add meal`,
-      'choose-seats': `Choose seats`
-    };
-
     return {
       'travel-way': (value) => (target.type.title = value),
       'destination': (value) => (target.place = value),
-      'offer': (value) => target.offers.push(offerValueToName[value]),
+      'offer': (value) => target.offers.push(value),
       'price': (value) => (target.price = value),
     };
   }
