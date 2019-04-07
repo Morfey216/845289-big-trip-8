@@ -1,5 +1,5 @@
 import API from './api.js';
-import pointData from './get-point-data.js';
+import {TYPES} from './get-point-data.js';
 import filtersData from './filters-data.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
@@ -8,7 +8,6 @@ import Statistic from './statistic.js';
 
 const AUTHORIZATION = `Basic eo0w590ik37599a${Math.random()}`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
-const START_AMOUNT_OF_POINTS = 7;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
 
@@ -75,10 +74,6 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
 
   dist.appendChild(pointFragment);
 };
-
-tripDayItemsBlock.textContent = `Loading route...`;
-
-const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
 
 const getDestinationsKit = (kit) => {
   destinationsKit = kit;
@@ -154,7 +149,36 @@ const renderFilters = (allFiltersData, allPoints) => {
   }
 };
 
+const createType = (itPoint) => {
+  const index = itPoint.types.findIndex((it) => it.type === itPoint.typeTitle);
+  const type = itPoint.types[index];
+
+  return type;
+};
+
+const createFullTypesData = () => {
+  for (const currentOffer of offersKit) {
+    const index = TYPES.findIndex((it) => it.title.toLowerCase() === currentOffer.type);
+    currentOffer.title = TYPES[index].title;
+    currentOffer.icon = TYPES[index].icon;
+    currentOffer.group = TYPES[index].group;
+  }
+
+  tripPoints.forEach((it) => {
+    it.types = offersKit;
+    it.type = createType(it);
+  });
+};
+
+const initRender = () => {
+  createFullTypesData();
+  renderTripPoints(tripDayItemsBlock, tripPoints);
+  renderStatistic(tripPoints);
+  renderFilters(filtersData(), tripPoints);
+};
+
 const loadData = () => {
+  tripDayItemsBlock.textContent = `Loading route...`;
   api.getDestinations()
   .then((destinations) => {
     getDestinationsKit(destinations);
@@ -170,15 +194,10 @@ const loadData = () => {
   .then(() => {
     api.getPoints()
     .then((points) => {
-      // console.log(points);
-      tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
-      renderTripPoints(tripDayItemsBlock, tripPoints);
-      renderStatistic(tripPoints);
-      renderFilters(filtersData(), tripPoints);
+      tripPoints = points;
+      initRender();
     });
   });
-
-
 };
 
 loadData();

@@ -6,6 +6,8 @@ import isEscEvent from './util.js';
 export default class EditPoint extends Component {
   constructor(data) {
     super();
+    this._id = data.id;
+    this._typeTitle = data.typeTitle;
     this._type = data.type;
     this._place = data.place;
     this._schedule = data.schedule;
@@ -15,8 +17,9 @@ export default class EditPoint extends Component {
     this._pictures = data.pictures;
     this._types = data.types;
     this._destinations = data.destinations;
+    this._isFavorite = data.isFavorite;
 
-    this._state.isFavorite = false;
+    // this._isFavorite = false;
 
     this._onSave = null;
     this._onReset = null;
@@ -64,9 +67,9 @@ export default class EditPoint extends Component {
       const determineIfOfferIsSelected = (offer) => entry.offers.some((it) => it === offer);
 
       for (const currentOffer of currentOffers) {
-        const selectedOffer = determineIfOfferIsSelected(currentOffer.name);
+        const selectedOffer = determineIfOfferIsSelected(currentOffer.title);
 
-        currentOffer.active = !!selectedOffer;
+        currentOffer.accepted = !!selectedOffer;
         newOffers.push(currentOffer);
       }
       return newOffers;
@@ -83,7 +86,7 @@ export default class EditPoint extends Component {
 
     const formData = new FormData(this._element.querySelector(`form`));
     const newData = this._processForm(formData);
-    this._state.isFavorite = this._element.querySelector(`.point__favorite-input`).checked;
+    this._isFavorite = this._element.querySelector(`.point__favorite-input`).checked;
 
     if (typeof this._onSave === `function`) {
       this._onSave(newData);
@@ -213,7 +216,7 @@ export default class EditPoint extends Component {
       </div>
 
       <div class="paint__favorite-wrap">
-        <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._state.isFavorite ? `checked` : ``}>
+        <input type="checkbox" class="point__favorite-input visually-hidden" id="favorite" name="favorite" ${this._isFavorite ? `checked` : ``}>
         <label class="point__favorite" for="favorite">favorite</label>
       </div>
     </header>
@@ -224,9 +227,9 @@ export default class EditPoint extends Component {
 
         <div class="point__offers-wrap">
           ${this._offers.map((offer) => (
-    `<input class="point__offers-input visually-hidden" type="checkbox" id=${offerNameToValue[offer.name]} name="offer" value=${offerNameToValue[offer.name]} ${offer.active ? `checked` : ``}>
-            <label for=${offerNameToValue[offer.name]} class="point__offers-label">
-            <span class="point__offer-service">${offer.name}</span> + €<span class="point__offer-price">${offer.price}</span>
+    `<input class="point__offers-input visually-hidden" type="checkbox" id=${offerNameToValue[offer.title]} name="offer" value=${offerNameToValue[offer.title]} ${offer.accepted ? `checked` : ``}>
+            <label for=${offerNameToValue[offer.title]} class="point__offers-label">
+            <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
           </label>`
   )).join(``)}
         </div>
@@ -236,7 +239,7 @@ export default class EditPoint extends Component {
         <h3 class="point__details-title">Destination</h3>
         <p class="point__destination-text">${this._description}</p>
         <div class="point__destination-images">
-          ${this._pictures.map((picture) => `<img src=${picture} alt="picture from place" class="point__destination-image"></img>`).join(``)}
+          ${this._pictures.map((picture) => `<img src=${picture.src} alt="${picture.description}" class="point__destination-image"></img>`).join(``)}
         </div>
       </section>
       <input type="hidden" class="point__total-price" name="total-price" value="">

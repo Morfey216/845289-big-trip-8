@@ -25,7 +25,7 @@ const PICTURES_INTERVAL = {
   MAX: 4
 };
 
-const TYPES = [
+export const TYPES = [
   {
     title: `Taxi`,
     icon: `🚕`,
@@ -161,14 +161,14 @@ const createPictures = () => {
   return pictures;
 };
 
-export default () => ({
-  type: createCurrentType(),
-  place: createPlace(),
-  schedule: createSchedule(),
-  price: getRandomInteger(),
-  offers: createOffers(),
-  description: createDescription(),
-  pictures: createPictures(),
-  types: TYPES,
-  destinations: PLACES
-});
+// export default () => ({
+//   type: createCurrentType(),
+//   place: createPlace(),
+//   schedule: createSchedule(),
+//   price: getRandomInteger(),
+//   offers: createOffers(),
+//   description: createDescription(),
+//   pictures: createPictures(),
+//   types: TYPES,
+//   destinations: PLACES
+// });
