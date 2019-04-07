@@ -21,8 +21,6 @@ export default class EditPoint extends Component {
     this._offersLabelKit = data.offersLabelKit;
     this._isFavorite = data.isFavorite;
 
-    // this._isFavorite = false;
-
     this._onSave = null;
     this._onReset = null;
     this._onDelete = null;
@@ -35,6 +33,7 @@ export default class EditPoint extends Component {
     this._onDeleteButtonClick = this._onDeleteButtonClick.bind(this);
     this._onEscKeydown = this._onEscKeydown.bind(this);
     this._onSelectWay = this._onSelectWay.bind(this);
+    this._onSelectDestination = this._onSelectDestination.bind(this);
   }
 
   _processForm(formData) {
@@ -45,6 +44,8 @@ export default class EditPoint extends Component {
         group: ``
       },
       place: ``,
+      description: ``,
+      pictures: [],
       schedule: {
         startTime: ``,
         endTime: ``
@@ -83,8 +84,12 @@ export default class EditPoint extends Component {
       return newOffers;
     };
 
+    const currentDestination = this._getNewDestination(entry.place);
+
     entry.offers = createNewOffers();
     entry.type = this._getNewType(entry.type.title);
+    entry.description = currentDestination.description;
+    entry.pictures = currentDestination.pictures;
     entry.schedule = this._getNewSchedule();
     return entry;
   }
@@ -120,6 +125,22 @@ export default class EditPoint extends Component {
     this._element.querySelector(`.point__destination-label`).textContent = `${newType.title} to`;
     this._element.querySelector(`.travel-way__label`).textContent = newType.icon;
     this._element.querySelector(`.travel-way__toggle`).checked = false;
+  }
+
+  _onSelectDestination(evt) {
+    const newDestination = this._getNewDestination(evt.target.value);
+    const picturesString = `${newDestination.pictures
+      .map((picture) => `<img src=${picture.src} alt="${picture.description}" class="point__destination-image"></img>`)
+      .join(``)}`;
+
+    this._element.querySelector(`.point__destination-text`).textContent = `${newDestination.description}`;
+    this._element.querySelector(`.point__destination-images`).innerHTML = picturesString;
+  }
+
+  _getNewDestination(destinationName) {
+    const destinations = this._destinations;
+    const index = destinations.findIndex((it) => it.name === destinationName);
+    return destinations[index];
   }
 
   _getNewType(title) {
@@ -264,6 +285,7 @@ export default class EditPoint extends Component {
     this._element.querySelector(`.point__button--delete`).addEventListener(`click`, this._onDeleteButtonClick);
     document.addEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.travel-way__select`).addEventListener(`change`, this._onSelectWay);
+    this._element.querySelector(`.point__destination-input`).addEventListener(`change`, this._onSelectDestination);
 
     const startTimeInput = this._element.querySelector(`.point__time input[name="date-start"]`);
     const endTimeInput = this._element.querySelector(`.point__time input[name="date-end"]`);
@@ -311,11 +333,14 @@ export default class EditPoint extends Component {
     this._element.querySelector(`.point__button--delete`).removeEventListener(`click`, this._onDeleteButtonClick);
     document.removeEventListener(`keydown`, this._onEscKeydown);
     this._element.querySelector(`.travel-way__select`).removeEventListener(`change`, this._onSelectWay);
+    this._element.querySelector(`.point__destination-input`).removeEventListener(`change`, this._onSelectDestination);
   }
 
   update(data) {
     this._type = data.type;
     this._place = data.place;
+    this._description = data.description;
+    this._pictures = data.pictures;
     this._schedule = data.schedule;
     this._price = data.price;
     this._offers = data.offers;
