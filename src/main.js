@@ -156,7 +156,7 @@ const createType = (itPoint) => {
   return type;
 };
 
-const createOffersNameList = (kit) => {
+const createOffersNameKit = (kit) => {
   const offersList = new Set();
   kit.forEach((it) => {
     it.offers.forEach((offer) => offersList.add(offer.name));
@@ -165,7 +165,7 @@ const createOffersNameList = (kit) => {
   return [...offersList];
 };
 
-const createOffersLabelList = (namesKit) => {
+const createOffersLabelKit = (namesKit) => {
   const labelsKit = [];
   namesKit.forEach((it) => {
     labelsKit.push(it.toLowerCase().replace(/ /g, `-`).replace(/,/g, ``).replace(/'/g, `-`));
@@ -186,8 +186,8 @@ const createFullPointsData = () => {
     it.destinations = destinationsKit;
     it.types = offersKit;
     it.type = createType(it);
-    it.offersNameKit = createOffersNameList(offersKit);
-    it.offersLabelKit = createOffersLabelList(it.offersNameKit);
+    it.offersNameKit = createOffersNameKit(offersKit);
+    it.offersLabelKit = createOffersLabelKit(it.offersNameKit);
   });
 };
 

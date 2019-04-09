@@ -9,6 +9,7 @@ export default class EditPoint extends Component {
     this._id = data.id;
     this._typeTitle = data.typeTitle;
     this._type = data.type;
+    this._type.offers = data.offers;
     this._place = data.place;
     this._schedule = data.schedule;
     this._price = data.price;
@@ -20,6 +21,9 @@ export default class EditPoint extends Component {
     this._offersNameKit = data.offersNameKit;
     this._offersLabelKit = data.offersLabelKit;
     this._isFavorite = data.isFavorite;
+
+    this._state.typeIsChanged = false;
+    this._state.destinationIsChanged = false;
 
     this._onSave = null;
     this._onReset = null;
@@ -43,6 +47,7 @@ export default class EditPoint extends Component {
         icon: `️`,
         group: ``
       },
+      typeTitle: ``,
       place: ``,
       description: ``,
       pictures: [],
@@ -55,7 +60,10 @@ export default class EditPoint extends Component {
     };
 
     const pointEditMapper = EditPoint.createMapper(entry);
-    const currentOffers = this._offers;
+    let currentDestination = {
+      description: this._description,
+      pictures: this._pictures,
+    };
 
     for (const pair of formData.entries()) {
       const [property, value] = pair;
@@ -65,15 +73,20 @@ export default class EditPoint extends Component {
       }
     }
 
-    const createNewOffers = () => {
+    const createNewOffers = (type) => {
+      let currentOffers = this._offers;
       const newOffers = [];
-      const newOffersName = [];
+      const newAcceptedOffersName = [];
 
       entry.offers.forEach((it) => {
-        newOffersName.push(this._getOfferName(it));
+        newAcceptedOffersName.push(this._getOfferName(it));
       });
 
-      const determineIfOfferIsSelected = (offer) => newOffersName.some((it) => it === offer);
+      const determineIfOfferIsSelected = (offer) => newAcceptedOffersName.some((it) => it === offer);
+
+      if (this._state.typeIsChanged) {
+        currentOffers = type.offers;
+      }
 
       for (const currentOffer of currentOffers) {
         const selectedOffer = determineIfOfferIsSelected(currentOffer.title);
@@ -81,13 +94,17 @@ export default class EditPoint extends Component {
         currentOffer.accepted = !!selectedOffer;
         newOffers.push(currentOffer);
       }
+
       return newOffers;
     };
 
-    const currentDestination = this._getNewDestination(entry.place);
+    if (this._state.destinationIsChanged) {
+      currentDestination = this._getNewDestination(entry.place);
+    }
 
-    entry.offers = createNewOffers();
     entry.type = this._getNewType(entry.type.title);
+    entry.typeTitle = entry.type.type;
+    entry.offers = createNewOffers(entry.type);
     entry.description = currentDestination.description;
     entry.pictures = currentDestination.pictures;
     entry.schedule = this._getNewSchedule();
@@ -122,19 +139,30 @@ export default class EditPoint extends Component {
 
   _onSelectWay(evt) {
     const newType = this._getNewType(evt.target.value);
+    const offersData = `${newType.offers
+      .map((offer) => (
+        `<input class="point__offers-input visually-hidden" type="checkbox" id=${this._getOfferLabel(offer.title)} name="offer" value=${this._getOfferLabel(offer.title)} ${offer.accepted ? `checked` : ``}>
+        <label for=${this._getOfferLabel(offer.title)} class="point__offers-label">
+        <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
+        </label>`))
+      .join(``)}`;
+
     this._element.querySelector(`.point__destination-label`).textContent = `${newType.title} to`;
     this._element.querySelector(`.travel-way__label`).textContent = newType.icon;
+    this._element.querySelector(`.point__offers-wrap`).innerHTML = offersData;
     this._element.querySelector(`.travel-way__toggle`).checked = false;
+    this._state.typeIsChanged = true;
   }
 
   _onSelectDestination(evt) {
     const newDestination = this._getNewDestination(evt.target.value);
-    const picturesString = `${newDestination.pictures
+    const picturesData = `${newDestination.pictures
       .map((picture) => `<img src=${picture.src} alt="${picture.description}" class="point__destination-image"></img>`)
       .join(``)}`;
 
     this._element.querySelector(`.point__destination-text`).textContent = `${newDestination.description}`;
-    this._element.querySelector(`.point__destination-images`).innerHTML = picturesString;
+    this._element.querySelector(`.point__destination-images`).innerHTML = picturesData;
+    this._state.destinationIsChanged = true;
   }
 
   _getNewDestination(destinationName) {
@@ -338,6 +366,7 @@ export default class EditPoint extends Component {
 
   update(data) {
     this._type = data.type;
+    this._typeTitle = data.typeTitle;
     this._place = data.place;
     this._description = data.description;
     this._pictures = data.pictures;
