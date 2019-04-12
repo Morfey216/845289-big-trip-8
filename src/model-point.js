@@ -4,8 +4,8 @@ export default class ModelPoint {
     this.typeTitle = data[`type`];
     this.offers = data[`offers`];
     this.schedule = {
-      startTime: data[`date_from`],
-      endTime: data[`date_to`]
+      startTime: new Date(data[`date_from`]),
+      endTime: new Date(data[`date_to`])
     };
     this.price = data[`base_price`];
     this.place = data[`destination`][`name`];

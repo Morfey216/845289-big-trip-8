@@ -17,14 +17,16 @@ const statisticButton = document.querySelector(`.view-switch__item[href="#stats"
 const filtersForm = document.querySelector(`.trip-filter`);
 const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
 
-let destinationsKit = null;
-let offersKit = null;
+let destinationsKit = [];
+let offersKit = [];
+let offersNameKit = [];
+let offersLabelKit = [];
 let tripPoints = [];
 let statistic = null;
 
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
-  points[index] = Object.assign({}, pointToUpdate, newPoint);
+  Object.assign(points[index], pointToUpdate, newPoint);
   return points[index];
 };
 
@@ -51,10 +53,14 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
     editPointComponent.onSave = (newObject) => {
       const updatedPoint = updatePointData(allPointsData, itPointData, newObject);
 
-      pointComponent.update(updatedPoint);
-      pointComponent.render();
-      dist.replaceChild(pointComponent.element, editPointComponent.element);
-      editPointComponent.unrender();
+      api.updatePoint({id: updatedPoint.id, data: updatedPoint.toRAW()})
+        .then((newPoint) => {
+          createFullPointData(newPoint);
+          pointComponent.update(newPoint);
+          pointComponent.render();
+          dist.replaceChild(pointComponent.element, editPointComponent.element);
+          editPointComponent.unrender();
+        });
     };
 
     editPointComponent.onReset = () => {
@@ -65,31 +71,17 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
 
     editPointComponent.onDelete = ({id}) => {
       api.deletePoint({id})
-      .then(() => {
-        dist.removeChild(editPointComponent.element);
-        editPointComponent.unrender();
-        deletePointData(allPointsData, itPointData);
-        // временная вставка
-        api.getPoints()
-          .then((points) => {
-            console.log(points);
-          });
-
-      });
+        .then(() => {
+          dist.removeChild(editPointComponent.element);
+          editPointComponent.unrender();
+          deletePointData(allPointsData, itPointData);
+        });
     };
 
     pointFragment.appendChild(pointComponent.render());
   }
 
   dist.appendChild(pointFragment);
-};
-
-const getDestinationsKit = (kit) => {
-  destinationsKit = kit;
-};
-
-const getOffersKit = (kit) => {
-  offersKit = kit;
 };
 
 const renderStatistic = (points) => {
@@ -183,12 +175,22 @@ const createOffersLabelKit = (namesKit) => {
   return labelsKit;
 };
 
+const getDestinationsKit = (kit) => {
+  destinationsKit = kit;
+};
+
+const getOffersKit = (kit) => {
+  offersKit = kit;
+  offersNameKit = createOffersNameKit(offersKit);
+  offersLabelKit = createOffersLabelKit(offersNameKit);
+};
+
 const createFullPointData = (point) => {
   point.destinations = destinationsKit;
   point.types = offersKit;
   point.type = createType(point);
-  point.offersNameKit = createOffersNameKit(offersKit);
-  point.offersLabelKit = createOffersLabelKit(point.offersNameKit);
+  point.offersNameKit = offersNameKit;
+  point.offersLabelKit = offersLabelKit;
 };
 
 const createFullPointsData = () => {

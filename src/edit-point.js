@@ -108,6 +108,7 @@ export default class EditPoint extends Component {
     entry.description = currentDestination.description;
     entry.pictures = currentDestination.pictures;
     entry.schedule = this._getNewSchedule();
+    entry.isFavorite = !!this._element.querySelector(`.point__favorite-input`).checked;
     return entry;
   }
 
@@ -116,7 +117,6 @@ export default class EditPoint extends Component {
 
     const formData = new FormData(this._element.querySelector(`form`));
     const newData = this._processForm(formData);
-    this._isFavorite = this._element.querySelector(`.point__favorite-input`).checked;
 
     if (typeof this._onSave === `function`) {
       this._onSave(newData);
@@ -141,8 +141,8 @@ export default class EditPoint extends Component {
     const newType = this._getNewType(evt.target.value);
     const offersData = `${newType.offers
       .map((offer) => (
-        `<input class="point__offers-input visually-hidden" type="checkbox" id=${this._getOfferLabel(offer.title)} name="offer" value=${this._getOfferLabel(offer.title)} ${offer.accepted ? `checked` : ``}>
-        <label for=${this._getOfferLabel(offer.title)} class="point__offers-label">
+        `<input class="point__offers-input visually-hidden" type="checkbox" id="${this._getOfferLabel(offer.title)}" name="offer" value="${this._getOfferLabel(offer.title)}" ${offer.accepted ? `checked` : ``}>
+        <label for="${this._getOfferLabel(offer.title)}" class="point__offers-label">
         <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
         </label>`))
       .join(``)}`;
@@ -235,14 +235,14 @@ export default class EditPoint extends Component {
         <div class="travel-way__select">
           <div class="travel-way__select-group">
             ${this._types.filter((it) => it.group === `transport`).map((way) => (
-    `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${way.title.toLowerCase()}" name="travel-way" value=${way.title.toLowerCase()} ${this._type.title === way.title ? `checked` : ``}>
+    `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${way.title.toLowerCase()}" name="travel-way" value="${way.title.toLowerCase()}" ${this._type.title === way.title ? `checked` : ``}>
             <label class="travel-way__select-label" for="travel-way-${way.title.toLowerCase()}">${way.icon} ${way.title.toLowerCase()}</label>`
   )).join(``)}          
           </div>
 
           <div class="travel-way__select-group">
             ${this._types.filter((it) => it.group === `service`).map((way) => (
-    `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${way.title.toLowerCase()}" name="travel-way" value=${way.title.toLowerCase()} ${this._type.title === way.title ? `checked` : ``}>
+    `<input class="travel-way__select-input visually-hidden" type="radio" id="travel-way-${way.title.toLowerCase()}" name="travel-way" value="${way.title.toLowerCase()}" ${this._type.title === way.title ? `checked` : ``}>
             <label class="travel-way__select-label" for="travel-way-${way.title.toLowerCase()}">${way.icon} ${way.title.toLowerCase()}</label>`
   )).join(``)}
           </div>
@@ -287,8 +287,8 @@ export default class EditPoint extends Component {
 
         <div class="point__offers-wrap">
           ${this._offers.map((offer) => (
-    `<input class="point__offers-input visually-hidden" type="checkbox" id=${this._getOfferLabel(offer.title)} name="offer" value=${this._getOfferLabel(offer.title)} ${offer.accepted ? `checked` : ``}>
-            <label for=${this._getOfferLabel(offer.title)} class="point__offers-label">
+    `<input class="point__offers-input visually-hidden" type="checkbox" id="${this._getOfferLabel(offer.title)}" name="offer" value="${this._getOfferLabel(offer.title)}" ${offer.accepted ? `checked` : ``}>
+            <label for="${this._getOfferLabel(offer.title)}" class="point__offers-label">
             <span class="point__offer-service">${offer.title}</span> + €<span class="point__offer-price">${offer.price}</span>
           </label>`
   )).join(``)}
@@ -332,6 +332,7 @@ export default class EditPoint extends Component {
           },
           onClose: (selectedDates) => {
             this._newSchedule.startTime = selectedDates[0];
+            this._newSchedule.endTime = time.endTime;
           },
           [`time_24hr`]: true
         }
@@ -349,6 +350,7 @@ export default class EditPoint extends Component {
             rangeSeparator: ` - `
           },
           onClose: (selectedDates) => {
+            this._newSchedule.startTime = time.startTime;
             this._newSchedule.endTime = selectedDates[0];
           },
           [`time_24hr`]: true
@@ -373,6 +375,7 @@ export default class EditPoint extends Component {
     this._schedule = data.schedule;
     this._price = data.price;
     this._offers = data.offers;
+    this._isFavorite = data.isFavorite;
     this._state.typeIsChanged = false;
     this._state.destinationIsChanged = false;
   }
