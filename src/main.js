@@ -63,10 +63,19 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
       editPointComponent.unrender();
     };
 
-    editPointComponent.onDelete = () => {
-      dist.removeChild(editPointComponent.element);
-      editPointComponent.unrender();
-      deletePointData(allPointsData, itPointData);
+    editPointComponent.onDelete = ({id}) => {
+      api.deletePoint({id})
+      .then(() => {
+        dist.removeChild(editPointComponent.element);
+        editPointComponent.unrender();
+        deletePointData(allPointsData, itPointData);
+        // временная вставка
+        api.getPoints()
+          .then((points) => {
+            console.log(points);
+          });
+
+      });
     };
 
     pointFragment.appendChild(pointComponent.render());
@@ -174,6 +183,14 @@ const createOffersLabelKit = (namesKit) => {
   return labelsKit;
 };
 
+const createFullPointData = (point) => {
+  point.destinations = destinationsKit;
+  point.types = offersKit;
+  point.type = createType(point);
+  point.offersNameKit = createOffersNameKit(offersKit);
+  point.offersLabelKit = createOffersLabelKit(point.offersNameKit);
+};
+
 const createFullPointsData = () => {
   for (const currentOffer of offersKit) {
     const index = TYPES.findIndex((it) => it.title.toLowerCase() === currentOffer.type);
@@ -182,13 +199,7 @@ const createFullPointsData = () => {
     currentOffer.group = TYPES[index].group;
   }
 
-  tripPoints.forEach((it) => {
-    it.destinations = destinationsKit;
-    it.types = offersKit;
-    it.type = createType(it);
-    it.offersNameKit = createOffersNameKit(offersKit);
-    it.offersLabelKit = createOffersLabelKit(it.offersNameKit);
-  });
+  tripPoints.forEach((it) => createFullPointData(it));
 };
 
 const initRender = () => {
@@ -204,13 +215,11 @@ const loadData = () => {
   api.getDestinations()
   .then((destinations) => {
     getDestinationsKit(destinations);
-    // console.log(destinationsKit);
   })
   .then(() => {
     api.getOffers()
     .then((offers) => {
       getOffersKit(offers);
-      // console.log(offersKit);
     });
   })
   .then(() => {

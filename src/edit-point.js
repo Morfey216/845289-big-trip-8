@@ -127,7 +127,7 @@ export default class EditPoint extends Component {
 
   _onDeleteButtonClick() {
     if (typeof this._onDelete === `function`) {
-      this._onDelete();
+      this._onDelete({id: this._id});
     }
   }
 
@@ -254,7 +254,7 @@ export default class EditPoint extends Component {
         <input class="point__destination-input" list="destination-select" id="destination" value="${this._place}" name="destination">
         <datalist id="destination-select">
           ${this._destinations.map((destination) => (
-    `<option value=${destination.name}></option>`)).join(``)}
+    `<option value="${destination.name}"></option>`)).join(``)}
         </datalist>
       </div>
 
@@ -373,6 +373,8 @@ export default class EditPoint extends Component {
     this._schedule = data.schedule;
     this._price = data.price;
     this._offers = data.offers;
+    this._state.typeIsChanged = false;
+    this._state.destinationIsChanged = false;
   }
 
   static createMapper(target) {

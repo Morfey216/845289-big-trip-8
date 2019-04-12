@@ -14,6 +14,23 @@ export default class ModelPoint {
     this.isFavorite = data[`is_favorite`];
   }
 
+  toRAW() {
+    return {
+      'id': this.id,
+      'type': this.typeTitle,
+      'offers': this.offers,
+      'date_from': this.schedule.startTime,
+      'date_to': this.schedule.endTime,
+      'base_price': this.price,
+      'destination': {
+        'name': this.place,
+        'description': this.description,
+        'pictures': this.pictures
+      },
+      'is_favorite': this.isFavorite
+    };
+  }
+
   static parsePoint(data) {
     return new ModelPoint(data);
   }
