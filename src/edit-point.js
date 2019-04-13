@@ -198,12 +198,16 @@ export default class EditPoint extends Component {
     return this._offersNameKit[index];
   }
 
-  _onChangeDate() {}
+  _shake() {
+    const ANIMATION_TIMEOUT = 600;
+    this._element.style.animation = `shake ${ANIMATION_TIMEOUT / 1000}s`;
 
-  // _setNewSchedule(schedule) {
-  //   this._newSchedule.startTime = schedule[0];
-  //   this._newSchedule.endTime = schedule[1];
-  // }
+    setTimeout(() => {
+      this._element.style.animation = ``;
+    }, ANIMATION_TIMEOUT);
+  }
+
+  // _onChangeDate() {}
 
   set onSave(fn) {
     this._onSave = fn;
@@ -378,6 +382,40 @@ export default class EditPoint extends Component {
     this._isFavorite = data.isFavorite;
     this._state.typeIsChanged = false;
     this._state.destinationIsChanged = false;
+  }
+
+  formActivate() {
+    const saveButton = this._element.querySelector(`.point__button--save`);
+    const deleteButton = this._element.querySelector(`.point__button--delete`);
+    const allInputs = this._element.querySelectorAll(`input`);
+
+    return {
+      block: () => {
+        this._element.style.border = ``;
+        saveButton.disabled = true;
+        deleteButton.disabled = true;
+        allInputs.forEach((input) => {
+          input.disabled = true;
+        });
+      },
+      unblock: () => {
+        saveButton.disabled = false;
+        deleteButton.disabled = false;
+        allInputs.forEach((input) => {
+          input.disabled = false;
+        });
+      },
+      showError: () => {
+        this._element.style.border = `1px solid red`;
+        this._shake();
+      },
+      showSaveButtonText: (text) => {
+        saveButton.textContent = text;
+      },
+      showDeleteButtonText: (text) => {
+        deleteButton.textContent = text;
+      }
+    };
   }
 
   static createMapper(target) {

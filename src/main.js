@@ -53,13 +53,26 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
     editPointComponent.onSave = (newObject) => {
       const updatedPoint = updatePointData(allPointsData, itPointData, newObject);
 
+      editPointComponent.formActivate().showSaveButtonText(`Saving...`);
+      editPointComponent.formActivate().block();
+
+      const unblock = () => {
+        editPointComponent.formActivate().showSaveButtonText(`Save`);
+        editPointComponent.formActivate().unblock();
+      };
+
       api.updatePoint({id: updatedPoint.id, data: updatedPoint.toRAW()})
         .then((newPoint) => {
+          unblock();
           createFullPointData(newPoint);
           pointComponent.update(newPoint);
           pointComponent.render();
           dist.replaceChild(pointComponent.element, editPointComponent.element);
           editPointComponent.unrender();
+        })
+        .catch(() => {
+          editPointComponent.formActivate().showError();
+          unblock();
         });
     };
 
@@ -70,11 +83,24 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
     };
 
     editPointComponent.onDelete = ({id}) => {
+      editPointComponent.formActivate().showDeleteButtonText(`Deleting...`);
+      editPointComponent.formActivate().block();
+
+      const unblock = () => {
+        editPointComponent.formActivate().showDeleteButtonText(`Delete`);
+        editPointComponent.formActivate().unblock();
+      };
+
       api.deletePoint({id})
         .then(() => {
+          unblock();
           dist.removeChild(editPointComponent.element);
           editPointComponent.unrender();
           deletePointData(allPointsData, itPointData);
+        })
+        .catch(() => {
+          editPointComponent.formActivate().showError();
+          unblock();
         });
     };
 
@@ -213,6 +239,7 @@ const initRender = () => {
 };
 
 const loadData = () => {
+  const loadErrorText = `Something went wrong while loading your route info. Check your connection or try again later`;
   tripDayItemsBlock.textContent = `Loading route...`;
   api.getDestinations()
   .then((destinations) => {
@@ -222,6 +249,9 @@ const loadData = () => {
     api.getOffers()
     .then((offers) => {
       getOffersKit(offers);
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .then(() => {
@@ -229,7 +259,13 @@ const loadData = () => {
     .then((points) => {
       tripPoints = points;
       initRender();
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
     });
+  })
+  .catch(() => {
+    tripDayItemsBlock.textContent = loadErrorText;
   });
 };
 
