@@ -1,18 +1,32 @@
-import pointData from './get-point-data.js';
+import API from './api.js';
+import {TYPES} from './get-point-data.js';
 import filtersData from './filters-data.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
 import Filter from './filter.js';
 import Statistic from './statistic.js';
 
-const START_AMOUNT_OF_POINTS = 7;
+const AUTHORIZATION = `Basic eo0w590ik37599a${Math.random()}`;
+const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 
+const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+
+const mainSection = document.querySelector(`.main`);
+const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
+const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
 const filtersForm = document.querySelector(`.trip-filter`);
-const tripPointsPosition = document.querySelector(`.trip-day__items`);
+const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
+
+let destinationsKit = [];
+let offersKit = [];
+let offersNameKit = [];
+let offersLabelKit = [];
+let tripPoints = [];
+let statistic = null;
 
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
-  points[index] = Object.assign({}, pointToUpdate, newPoint);
+  Object.assign(points[index], pointToUpdate, newPoint);
   return points[index];
 };
 
@@ -22,8 +36,8 @@ const deletePointData = (points, point) => {
   return points;
 };
 
-const renderTripPoints = (dist, allPointsData, filteredPointData) => {
-  tripPointsPosition.innerHTML = ``;
+const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) => {
+  tripDayItemsBlock.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
   for (const itPointData of filteredPointData) {
@@ -39,10 +53,27 @@ const renderTripPoints = (dist, allPointsData, filteredPointData) => {
     editPointComponent.onSave = (newObject) => {
       const updatedPoint = updatePointData(allPointsData, itPointData, newObject);
 
-      pointComponent.update(updatedPoint);
-      pointComponent.render();
-      dist.replaceChild(pointComponent.element, editPointComponent.element);
-      editPointComponent.unrender();
+      editPointComponent.formActivate().showSaveButtonText(`Saving...`);
+      editPointComponent.formActivate().block();
+
+      const unblock = () => {
+        editPointComponent.formActivate().showSaveButtonText(`Save`);
+        editPointComponent.formActivate().unblock();
+      };
+
+      api.updatePoint({id: updatedPoint.id, data: updatedPoint.toRAW()})
+        .then((newPoint) => {
+          unblock();
+          createFullPointData(newPoint);
+          pointComponent.update(newPoint);
+          pointComponent.render();
+          dist.replaceChild(pointComponent.element, editPointComponent.element);
+          editPointComponent.unrender();
+        })
+        .catch(() => {
+          editPointComponent.formActivate().showError();
+          unblock();
+        });
     };
 
     editPointComponent.onReset = () => {
@@ -51,10 +82,26 @@ const renderTripPoints = (dist, allPointsData, filteredPointData) => {
       editPointComponent.unrender();
     };
 
-    editPointComponent.onDelete = () => {
-      dist.removeChild(editPointComponent.element);
-      editPointComponent.unrender();
-      deletePointData(allPointsData, itPointData);
+    editPointComponent.onDelete = ({id}) => {
+      editPointComponent.formActivate().showDeleteButtonText(`Deleting...`);
+      editPointComponent.formActivate().block();
+
+      const unblock = () => {
+        editPointComponent.formActivate().showDeleteButtonText(`Delete`);
+        editPointComponent.formActivate().unblock();
+      };
+
+      api.deletePoint({id})
+        .then(() => {
+          unblock();
+          dist.removeChild(editPointComponent.element);
+          editPointComponent.unrender();
+          deletePointData(allPointsData, itPointData);
+        })
+        .catch(() => {
+          editPointComponent.formActivate().showError();
+          unblock();
+        });
     };
 
     pointFragment.appendChild(pointComponent.render());
@@ -63,31 +110,65 @@ const renderTripPoints = (dist, allPointsData, filteredPointData) => {
   dist.appendChild(pointFragment);
 };
 
-const filteredPoints = (points, filter) => {
-  let newTripPoints;
-  switch (filter) {
-    case `filter-everything`:
-      newTripPoints = points;
-      break;
-    case `filter-future`:
-      newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
-      break;
-    case `filter-past`:
-      newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
-      break;
-  }
-  renderTripPoints(tripPointsPosition, points, newTripPoints);
+const renderStatistic = (points) => {
+  statistic = new Statistic(points);
+  mainSection.parentNode.appendChild(statistic.render());
+
+  const statisticSection = document.querySelector(`.statistic`);
+
+  const onTableButtonClick = (evt) => {
+    evt.preventDefault();
+
+    tableButton.classList.add(`view-switch__item--active`);
+    statisticButton.classList.remove(`view-switch__item--active`);
+
+    mainSection.classList.remove(`visually-hidden`);
+    statisticSection.classList.add(`visually-hidden`);
+
+    renderTripPoints(tripDayItemsBlock, tripPoints);
+  };
+
+  const onStatisticButtonClick = (evt) => {
+    evt.preventDefault();
+
+    tableButton.classList.remove(`view-switch__item--active`);
+    statisticButton.classList.add(`view-switch__item--active`);
+
+    mainSection.classList.add(`visually-hidden`);
+    statisticSection.classList.remove(`visually-hidden`);
+
+    statistic.renderCharts();
+  };
+
+  tableButton.addEventListener(`click`, onTableButtonClick);
+  statisticButton.addEventListener(`click`, onStatisticButtonClick);
 };
 
-const renderFilters = (allFiltersData) => {
+const renderFilters = (allFiltersData, allPoints) => {
   filtersForm.innerHTML = ``;
+
+  const filteredPoints = (points, filter) => {
+    let newTripPoints = [];
+    switch (filter) {
+      case `filter-everything`:
+        newTripPoints = points;
+        break;
+      case `filter-future`:
+        newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
+        break;
+      case `filter-past`:
+        newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
+        break;
+    }
+    renderTripPoints(tripDayItemsBlock, points, newTripPoints);
+  };
 
   for (const itFilterData of allFiltersData) {
     const filterComponent = new Filter(itFilterData);
 
     filterComponent.onFilter = (evt) => {
       const filterCaption = evt.target.htmlFor;
-      filteredPoints(tripPoints, filterCaption);
+      filteredPoints(allPoints, filterCaption);
     };
 
     const filterElement = filterComponent.render();
@@ -95,44 +176,97 @@ const renderFilters = (allFiltersData) => {
   }
 };
 
-const getTripPoints = (amount) => new Array(amount).fill().map(pointData);
-const tripPoints = getTripPoints(START_AMOUNT_OF_POINTS);
+const createType = (itPoint) => {
+  const index = itPoint.types.findIndex((it) => it.type === itPoint.typeTitle);
+  const type = itPoint.types[index];
 
-renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
-renderFilters(filtersData());
-
-const mainSection = document.querySelector(`.main`);
-
-const statistic = new Statistic(tripPoints);
-mainSection.parentNode.appendChild(statistic.render());
-
-const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
-const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
-const statisticSection = document.querySelector(`.statistic`);
-
-const onTableButtonClick = (evt) => {
-  evt.preventDefault();
-
-  tableButton.classList.add(`view-switch__item--active`);
-  statisticButton.classList.remove(`view-switch__item--active`);
-
-  mainSection.classList.remove(`visually-hidden`);
-  statisticSection.classList.add(`visually-hidden`);
-
-  renderTripPoints(tripPointsPosition, tripPoints, tripPoints);
+  return type;
 };
 
-const onStatisticButtonClick = (evt) => {
-  evt.preventDefault();
+const createOffersNameKit = (kit) => {
+  const offersList = new Set();
+  kit.forEach((it) => {
+    it.offers.forEach((offer) => offersList.add(offer.name));
+  });
 
-  tableButton.classList.remove(`view-switch__item--active`);
-  statisticButton.classList.add(`view-switch__item--active`);
-
-  mainSection.classList.add(`visually-hidden`);
-  statisticSection.classList.remove(`visually-hidden`);
-
-  statistic.renderCharts();
+  return [...offersList];
 };
 
-tableButton.addEventListener(`click`, onTableButtonClick);
-statisticButton.addEventListener(`click`, onStatisticButtonClick);
+const createOffersLabelKit = (namesKit) => {
+  const labelsKit = [];
+  namesKit.forEach((it) => {
+    labelsKit.push(it.toLowerCase().replace(/ /g, `-`).replace(/,/g, ``).replace(/'/g, `-`));
+  });
+
+  return labelsKit;
+};
+
+const getDestinationsKit = (kit) => {
+  destinationsKit = kit;
+};
+
+const getOffersKit = (kit) => {
+  offersKit = kit;
+  offersNameKit = createOffersNameKit(offersKit);
+  offersLabelKit = createOffersLabelKit(offersNameKit);
+};
+
+const createFullPointData = (point) => {
+  point.destinations = destinationsKit;
+  point.types = offersKit;
+  point.type = createType(point);
+  point.offersNameKit = offersNameKit;
+  point.offersLabelKit = offersLabelKit;
+};
+
+const createFullPointsData = () => {
+  for (const currentOffer of offersKit) {
+    const index = TYPES.findIndex((it) => it.title.toLowerCase() === currentOffer.type);
+    currentOffer.title = TYPES[index].title;
+    currentOffer.icon = TYPES[index].icon;
+    currentOffer.group = TYPES[index].group;
+  }
+
+  tripPoints.forEach((it) => createFullPointData(it));
+};
+
+const initRender = () => {
+  createFullPointsData();
+  // console.log(tripPoints);
+  renderTripPoints(tripDayItemsBlock, tripPoints);
+  renderStatistic(tripPoints);
+  renderFilters(filtersData(), tripPoints);
+};
+
+const loadData = () => {
+  const loadErrorText = `Something went wrong while loading your route info. Check your connection or try again later`;
+  tripDayItemsBlock.textContent = `Loading route...`;
+  api.getDestinations()
+  .then((destinations) => {
+    getDestinationsKit(destinations);
+  })
+  .then(() => {
+    api.getOffers()
+    .then((offers) => {
+      getOffersKit(offers);
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
+    });
+  })
+  .then(() => {
+    api.getPoints()
+    .then((points) => {
+      tripPoints = points;
+      initRender();
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
+    });
+  })
+  .catch(() => {
+    tripDayItemsBlock.textContent = loadErrorText;
+  });
+};
+
+loadData();
