@@ -232,7 +232,7 @@ const createFullPointsData = () => {
 
 const initRender = () => {
   createFullPointsData();
-  console.log(tripPoints);
+  // console.log(tripPoints);
   renderTripPoints(tripDayItemsBlock, tripPoints);
   renderStatistic(tripPoints);
   renderFilters(filtersData(), tripPoints);
