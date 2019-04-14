@@ -1,4 +1,6 @@
 import API from './api.js';
+import Provider from './provider.js';
+import Store from './store.js';
 import {TYPES} from './get-point-data.js';
 import filtersData from './filters-data.js';
 import Point from './point.js';
@@ -6,10 +8,13 @@ import EditPoint from './edit-point.js';
 import Filter from './filter.js';
 import Statistic from './statistic.js';
 
-const AUTHORIZATION = `Basic eo0w590ik37599a${Math.random()}`;
+const AUTHORIZATION = `Basic eo0w590ik37599a`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
+const POINTS_STORE_KEY = `points-store-key`;
 
 const api = new API({endPoint: END_POINT, authorization: AUTHORIZATION});
+const store = new Store({key: POINTS_STORE_KEY, storage: localStorage});
+const provider = new Provider({api, store, generateId: () => String(Date.now())});
 
 const mainSection = document.querySelector(`.main`);
 const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
@@ -23,6 +28,15 @@ let offersNameKit = [];
 let offersLabelKit = [];
 let tripPoints = [];
 let statistic = null;
+
+window.addEventListener(`offline`, () => {
+  document.title = `${document.title}[OFFLINE]`;
+});
+
+window.addEventListener(`online`, () => {
+  document.title = document.title.split(`[OFFLINE]`)[0];
+  provider.syncPoints();
+});
 
 const updatePointData = (points, pointToUpdate, newPoint) => {
   const index = points.findIndex((it) => it === pointToUpdate);
@@ -61,7 +75,7 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
         editPointComponent.formActivate().unblock();
       };
 
-      api.updatePoint({id: updatedPoint.id, data: updatedPoint.toRAW()})
+      provider.updatePoint({id: updatedPoint.id, data: updatedPoint.toRAW()})
         .then((newPoint) => {
           unblock();
           createFullPointData(newPoint);
@@ -91,7 +105,7 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
         editPointComponent.formActivate().unblock();
       };
 
-      api.deletePoint({id})
+      provider.deletePoint({id})
         .then(() => {
           unblock();
           dist.removeChild(editPointComponent.element);
@@ -241,12 +255,12 @@ const initRender = () => {
 const loadData = () => {
   const loadErrorText = `Something went wrong while loading your route info. Check your connection or try again later`;
   tripDayItemsBlock.textContent = `Loading route...`;
-  api.getDestinations()
+  provider.getDestinations()
   .then((destinations) => {
     getDestinationsKit(destinations);
   })
   .then(() => {
-    api.getOffers()
+    provider.getOffers()
     .then((offers) => {
       getOffersKit(offers);
     })
@@ -255,7 +269,7 @@ const loadData = () => {
     });
   })
   .then(() => {
-    api.getPoints()
+    provider.getPoints()
     .then((points) => {
       tripPoints = points;
       initRender();
