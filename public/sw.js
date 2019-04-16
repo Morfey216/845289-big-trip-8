@@ -10,7 +10,7 @@ self.addEventListener(`install`, (evt) => {
         `./css/main.css`,
         `./img/star.svg`,
         `./img/star--check.svg`,
-        `./bundle.js`,
+        // `./bundle.js`,
       ]);
     })
     .catch((err) => {
