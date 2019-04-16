@@ -34,7 +34,6 @@ export default class Store {
     try {
       return JSON.parse(items);
     } catch (e) {
-      // console.error(`Error parse items. Error: ${e}. Items: ${items}`);
       return emptyItems;
     }
   }
