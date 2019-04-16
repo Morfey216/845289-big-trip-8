@@ -4,13 +4,13 @@ self.addEventListener(`install`, (evt) => {
   evt.waitUntil(caches.open(CACHE_NAME)
     .then((cache) => {
       return cache.addAll([
-        `/`,
-        `/index.html`,
-        `/css/normalize.css`,
-        `/css/main.css`,
-        `/img/star.svg`,
-        `/img/star--check.svg`,
-        `/bundle.js`,
+        `./`,
+        `./index.html`,
+        `./css/normalize.css`,
+        `./css/main.css`,
+        `./img/star.svg`,
+        `./img/star--check.svg`,
+        `./bundle.js`,
       ]);
     })
     .catch((err) => {
