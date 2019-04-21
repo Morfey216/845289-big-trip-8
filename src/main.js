@@ -1,15 +1,17 @@
+import moment from 'moment';
 import API from './api.js';
 import Provider from './provider.js';
 import Store from './store.js';
 import {TYPES} from './get-point-data.js';
 import filtersData from './filters-data.js';
+import Day from './day.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
 import Filter from './filter.js';
 import Statistic from './statistic.js';
 import TotalCost from './total-cost.js';
 
-const AUTHORIZATION = `Basic eo0w590ik37599a`;
+const AUTHORIZATION = `Basic eo0w590ik37399a`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 const POINTS_STORE_KEY = `points-store-key`;
 
@@ -21,6 +23,7 @@ const mainSection = document.querySelector(`.main`);
 const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
 const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
 const filtersForm = document.querySelector(`.trip-filter`);
+const tripDaysBlock = document.querySelector(`.trip-points`);
 const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
 const totalCostElement = document.querySelector(`.trip__total`);
 
@@ -32,6 +35,9 @@ let tripPoints = [];
 let statistic = null;
 let tripTotalCost = 0;
 const cost = new TotalCost(tripTotalCost);
+const daysTitleSet = new Set();
+let daysDateKit = [];
+const daysPointsData = {};
 
 window.addEventListener(`offline`, () => {
   document.title = `${document.title}[OFFLINE]`;
@@ -54,11 +60,11 @@ const deletePointData = (points, point) => {
   return points;
 };
 
-const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) => {
-  tripDayItemsBlock.innerHTML = ``;
+const renderTripPoints = (dist, allPointsData, fractionPointsData = tripPoints) => {
+  dist.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
-  for (const itPointData of filteredPointData) {
+  for (const itPointData of fractionPointsData) {
     const pointComponent = new Point(itPointData);
     const editPointComponent = new EditPoint(itPointData);
 
@@ -245,6 +251,15 @@ const getOffersKit = (kit) => {
   offersLabelKit = createOffersLabelKit(offersNameKit);
 };
 
+const createFullOffersData = () => {
+  for (const currentOffer of offersKit) {
+    const index = TYPES.findIndex((it) => it.title.toLowerCase() === currentOffer.type);
+    currentOffer.title = TYPES[index].title;
+    currentOffer.icon = TYPES[index].icon;
+    currentOffer.group = TYPES[index].group;
+  }
+};
+
 const countOffersCost = (offers) => {
   const offersCost = offers.filter((offer) => offer.accepted).reduce((acc, offer) => acc + offer.price, 0);
   return offersCost;
@@ -265,24 +280,55 @@ const createFullPointData = (point) => {
   point.fullCost = countPointCost(point);
 };
 
-const createFullPointsData = () => {
-  for (const currentOffer of offersKit) {
-    const index = TYPES.findIndex((it) => it.title.toLowerCase() === currentOffer.type);
-    currentOffer.title = TYPES[index].title;
-    currentOffer.icon = TYPES[index].icon;
-    currentOffer.group = TYPES[index].group;
-  }
+const createDaysTitle = (time) => {
+  daysTitleSet.add(moment(time).format(`MMM DD`));
+};
 
+const createFullPointsData = () => {
   tripPoints.forEach((it) => {
     createFullPointData(it);
+    createDaysTitle(it.schedule.startTime);
+
     tripTotalCost += it.fullCost;
+
   });
 };
 
+const createDayPointsData = () => {
+  daysDateKit = [...daysTitleSet].sort((first, second) => moment(first, `MMM DD`) - moment(second, `MMM DD`));
+
+  for (const dayData of daysDateKit) {
+    daysPointsData[dayData] = [];
+  }
+
+  for (const point of tripPoints) {
+    daysPointsData[moment(point.schedule.startTime).format(`MMM DD`)].push(point);
+  }
+
+  console.log(daysPointsData);
+};
+
+const renderDays = () => {
+  tripDaysBlock.innerHTML = ``;
+  const daysFragment = document.createDocumentFragment();
+
+  for (let i = 0; i < daysDateKit.length; i++) {
+    const dayComponent = new Day(i + 1, daysDateKit[i]);
+    const dayComponentElement = dayComponent.render();
+    daysFragment.appendChild(dayComponentElement);
+
+    const currentDayItemsBlock = dayComponent.element.querySelector(`.trip-day__items`);
+    renderTripPoints(currentDayItemsBlock, tripPoints, daysPointsData[daysDateKit[i]]);
+  }
+
+  tripDaysBlock.appendChild(daysFragment);
+};
+
 const initRender = () => {
+  createFullOffersData();
   createFullPointsData();
-  console.log(tripPoints);
-  renderTripPoints(tripDayItemsBlock, tripPoints);
+  createDayPointsData();
+  renderDays();
   renderTripTotalCost(tripTotalCost);
   renderStatistic(tripPoints);
   renderFilters(filtersData(), tripPoints);
@@ -299,9 +345,6 @@ const loadData = () => {
     provider.getOffers()
     .then((offers) => {
       getOffersKit(offers);
-    })
-    .catch(() => {
-      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .then(() => {
@@ -309,9 +352,6 @@ const loadData = () => {
     .then((points) => {
       tripPoints = points;
       initRender();
-    })
-    .catch(() => {
-      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .catch(() => {
