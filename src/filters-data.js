@@ -4,7 +4,7 @@ const FILTER_CAPTIONS = [
   `Past`
 ];
 
-const createFilter = (captions) => {
+const createFilters = (captions) => {
   const filters = [];
   for (const caption of captions) {
     filters.push({
@@ -17,7 +17,7 @@ const createFilter = (captions) => {
 
 
 export default () => {
-  const allFilters = createFilter(FILTER_CAPTIONS);
+  const allFilters = createFilters(FILTER_CAPTIONS);
   allFilters[0].checked = true;
   return allFilters;
 };

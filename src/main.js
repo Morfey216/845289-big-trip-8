@@ -7,6 +7,7 @@ import Point from './point.js';
 import EditPoint from './edit-point.js';
 import Filter from './filter.js';
 import Statistic from './statistic.js';
+import TotalCost from './total-cost.js';
 
 const AUTHORIZATION = `Basic eo0w590ik37599a`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
@@ -21,6 +22,7 @@ const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
 const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
 const filtersForm = document.querySelector(`.trip-filter`);
 const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
+const totalCostElement = document.querySelector(`.trip__total`);
 
 let destinationsKit = [];
 let offersKit = [];
@@ -28,6 +30,8 @@ let offersNameKit = [];
 let offersLabelKit = [];
 let tripPoints = [];
 let statistic = null;
+let tripTotalCost = 0;
+const cost = new TotalCost(tripTotalCost);
 
 window.addEventListener(`offline`, () => {
   document.title = `${document.title}[OFFLINE]`;
@@ -66,6 +70,7 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
 
     editPointComponent.onSave = (newObject) => {
       const updatedPoint = updatePointData(allPointsData, itPointData, newObject);
+      const currentPointCost = (updatedPoint.fullCost);
 
       editPointComponent.formActivate().showSaveButtonText(`Saving...`);
       editPointComponent.formActivate().block();
@@ -79,6 +84,12 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
         .then((newPoint) => {
           unblock();
           createFullPointData(newPoint);
+          const newUpdatedPoint = updatePointData(allPointsData, itPointData, newPoint);
+          const newPointCost = newUpdatedPoint.fullCost;
+
+          tripTotalCost = tripTotalCost + newPointCost - currentPointCost;
+          renderTripTotalCost(tripTotalCost);
+
           pointComponent.update(newPoint);
           pointComponent.render();
           dist.replaceChild(pointComponent.element, editPointComponent.element);
@@ -111,6 +122,9 @@ const renderTripPoints = (dist, allPointsData, filteredPointData = tripPoints) =
           dist.removeChild(editPointComponent.element);
           editPointComponent.unrender();
           deletePointData(allPointsData, itPointData);
+
+          tripTotalCost = tripTotalCost - itPointData.fullCost;
+          renderTripTotalCost(tripTotalCost);
         })
         .catch(() => {
           editPointComponent.formActivate().showError();
@@ -190,6 +204,12 @@ const renderFilters = (allFiltersData, allPoints) => {
   }
 };
 
+const renderTripTotalCost = (currentTotalCost) => {
+  cost.update(currentTotalCost);
+  const costElement = cost.render();
+  totalCostElement.replaceChild(costElement, totalCostElement.lastChild);
+};
+
 const createType = (itPoint) => {
   const index = itPoint.types.findIndex((it) => it.type === itPoint.typeTitle);
   const type = itPoint.types[index];
@@ -225,12 +245,24 @@ const getOffersKit = (kit) => {
   offersLabelKit = createOffersLabelKit(offersNameKit);
 };
 
+const countOffersCost = (offers) => {
+  const offersCost = offers.filter((offer) => offer.accepted).reduce((acc, offer) => acc + offer.price, 0);
+  return offersCost;
+};
+
+const countPointCost = (point) => {
+  const offersCost = countOffersCost(point.offers);
+  const pointCost = +point.price + offersCost;
+  return pointCost;
+};
+
 const createFullPointData = (point) => {
   point.destinations = destinationsKit;
   point.types = offersKit;
   point.type = createType(point);
   point.offersNameKit = offersNameKit;
   point.offersLabelKit = offersLabelKit;
+  point.fullCost = countPointCost(point);
 };
 
 const createFullPointsData = () => {
@@ -241,13 +273,17 @@ const createFullPointsData = () => {
     currentOffer.group = TYPES[index].group;
   }
 
-  tripPoints.forEach((it) => createFullPointData(it));
+  tripPoints.forEach((it) => {
+    createFullPointData(it);
+    tripTotalCost += it.fullCost;
+  });
 };
 
 const initRender = () => {
   createFullPointsData();
-  // console.log(tripPoints);
+  console.log(tripPoints);
   renderTripPoints(tripDayItemsBlock, tripPoints);
+  renderTripTotalCost(tripTotalCost);
   renderStatistic(tripPoints);
   renderFilters(filtersData(), tripPoints);
 };
