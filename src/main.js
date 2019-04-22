@@ -47,16 +47,16 @@ window.addEventListener(`online`, () => {
   provider.syncPoints();
 });
 
-const updatePointData = (points, pointToUpdate, newPoint) => {
-  const index = points.findIndex((it) => it === pointToUpdate);
-  Object.assign(points[index], pointToUpdate, newPoint);
-  return points[index];
+const updatePointData = (pointToUpdate, newPoint) => {
+  const index = tripPoints.findIndex((it) => it === pointToUpdate);
+  Object.assign(tripPoints[index], pointToUpdate, newPoint);
+  return tripPoints[index];
 };
 
-const deletePointData = (points, point) => {
-  const index = points.findIndex((it) => it === point);
-  points.splice(index, 1);
-  return points;
+const deletePointData = (point) => {
+  const index = tripPoints.findIndex((it) => it === point);
+  tripPoints.splice(index, 1);
+  return tripPoints;
 };
 
 const deleteDaysDate = (date) => {
@@ -68,7 +68,11 @@ const updateDaysDate = () => {
   renderDays();
 };
 
-const renderTripPoints = (dist, allPointsData, fractionPointsData = tripPoints) => {
+const getDayDate = (pointData) => {
+  return moment(pointData.schedule.startTime).format(`MMM DD`);
+};
+
+const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
   dist.innerHTML = ``;
   const pointFragment = document.createDocumentFragment();
 
@@ -83,7 +87,7 @@ const renderTripPoints = (dist, allPointsData, fractionPointsData = tripPoints) 
     };
 
     editPointComponent.onSave = (newObject) => {
-      const updatedPoint = updatePointData(allPointsData, itPointData, newObject);
+      const updatedPoint = updatePointData(itPointData, newObject);
       const currentPointCost = (updatedPoint.fullCost);
 
       editPointComponent.formActivate().showSaveButtonText(`Saving...`);
@@ -98,16 +102,22 @@ const renderTripPoints = (dist, allPointsData, fractionPointsData = tripPoints) 
         .then((newPoint) => {
           unblock();
           createFullPointData(newPoint);
-          const newUpdatedPoint = updatePointData(allPointsData, itPointData, newPoint);
+          const newUpdatedPoint = updatePointData(itPointData, newPoint);
           const newPointCost = newUpdatedPoint.fullCost;
 
           tripTotalCost = tripTotalCost + newPointCost - currentPointCost;
           renderTripTotalCost(tripTotalCost);
+          const dayDate = getDayDate(newUpdatedPoint);
 
-          pointComponent.update(newPoint);
-          pointComponent.render();
-          dist.replaceChild(pointComponent.element, editPointComponent.element);
-          editPointComponent.unrender();
+          if (dayDate !== dist.parentNode.querySelector(`.trip-day__title`).textContent) {
+            createDaysPointsData(tripPoints);
+            renderDays();
+          } else {
+            pointComponent.update(newPoint);
+            pointComponent.render();
+            dist.replaceChild(pointComponent.element, editPointComponent.element);
+            editPointComponent.unrender();
+          }
         })
         .catch(() => {
           editPointComponent.formActivate().showError();
@@ -135,8 +145,8 @@ const renderTripPoints = (dist, allPointsData, fractionPointsData = tripPoints) 
           unblock();
           dist.removeChild(editPointComponent.element);
           editPointComponent.unrender();
-          const dayDate = moment(itPointData.schedule.startTime).format(`MMM DD`);
-          deletePointData(allPointsData, itPointData);
+          const dayDate = getDayDate(itPointData);
+          deletePointData(itPointData);
 
           if (dist.childElementCount === 0) {
             dist.parentNode.parentNode.removeChild(dist.parentNode);
@@ -173,8 +183,6 @@ const renderStatistic = (points) => {
 
     mainSection.classList.remove(`visually-hidden`);
     statisticSection.classList.add(`visually-hidden`);
-
-    renderTripPoints(tripDayItemsBlock, tripPoints);
   };
 
   const onStatisticButtonClick = (evt) => {
@@ -209,7 +217,7 @@ const renderFilters = (allFiltersData, allPoints) => {
         newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
         break;
     }
-    renderTripPoints(tripDayItemsBlock, points, newTripPoints);
+    renderTripPoints(tripDayItemsBlock, newTripPoints);
   };
 
   for (const itFilterData of allFiltersData) {
@@ -295,17 +303,16 @@ const createFullPointData = (point) => {
   point.fullCost = countPointCost(point);
 };
 
-const createDaysTitle = (time) => {
-  daysPointsData.set(moment(time).format(`MMM DD`), []);
+const initNewDaysPointsData = (date) => {
+  if (!daysPointsData.has(date)) {
+    daysPointsData.set(date, []);
+  }
 };
 
 const createFullPointsData = () => {
   tripPoints.forEach((it) => {
     createFullPointData(it);
-    createDaysTitle(it.schedule.startTime);
-
     tripTotalCost += it.fullCost;
-
   });
 };
 
@@ -313,15 +320,19 @@ const createDaysDateKit = () => {
   daysDateKit = Array.from(daysPointsData.keys()).sort((first, second) => moment(first, `MMM DD`) - moment(second, `MMM DD`));
 };
 
-const createDaysPointsData = () => {
-  createDaysDateKit();
+const createDaysPointsData = (points) => {
+  daysPointsData.clear();
 
-  for (const point of tripPoints) {
-    const data = moment(point.schedule.startTime).format(`MMM DD`);
-    const dayPoints = daysPointsData.get(data);
+  for (const point of points) {
+    const date = getDayDate(point);
+    initNewDaysPointsData(date);
+
+    const dayPoints = daysPointsData.get(date);
     dayPoints.push(point);
-    daysPointsData.set(data, dayPoints);
+    daysPointsData.set(date, dayPoints);
   }
+
+  createDaysDateKit();
 };
 
 const renderDays = () => {
@@ -333,7 +344,7 @@ const renderDays = () => {
     daysFragment.appendChild(dayComponentElement);
 
     const currentDayItemsBlock = dayComponent.element.querySelector(`.trip-day__items`);
-    renderTripPoints(currentDayItemsBlock, tripPoints, daysPointsData.get(daysDateKit[i]));
+    renderTripPoints(currentDayItemsBlock, daysPointsData.get(daysDateKit[i]));
   }
 
   tripDaysBlock.innerHTML = ``;
@@ -343,7 +354,7 @@ const renderDays = () => {
 const initRender = () => {
   createFullOffersData();
   createFullPointsData();
-  createDaysPointsData();
+  createDaysPointsData(tripPoints);
   renderDays();
   renderTripTotalCost(tripTotalCost);
   renderStatistic(tripPoints);
@@ -361,6 +372,9 @@ const loadData = () => {
     provider.getOffers()
     .then((offers) => {
       getOffersKit(offers);
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .then(() => {

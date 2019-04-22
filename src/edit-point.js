@@ -29,8 +29,8 @@ export default class EditPoint extends Component {
     this._onReset = null;
     this._onDelete = null;
     this._newSchedule = {
-      startTime: ``,
-      endTime: ``
+      startTime: this._schedule.startTime,
+      endTime: this._schedule.endTime
     };
 
     this._onSaveButtonClick = this._onSaveButtonClick.bind(this);
@@ -207,8 +207,6 @@ export default class EditPoint extends Component {
     }, ANIMATION_TIMEOUT);
   }
 
-  // _onChangeDate() {}
-
   set onSave(fn) {
     this._onSave = fn;
   }
@@ -330,13 +328,13 @@ export default class EditPoint extends Component {
           altInput: true,
           altFormat: `H:i`,
           dateFormat: `H:i`,
+          minuteIncrement: 1,
           defaultDate: [time.startTime],
           locale: {
             rangeSeparator: ` - `
           },
           onClose: (selectedDates) => {
             this._newSchedule.startTime = selectedDates[0];
-            this._newSchedule.endTime = time.endTime;
           },
           [`time_24hr`]: true
         }
@@ -349,12 +347,12 @@ export default class EditPoint extends Component {
           altInput: true,
           altFormat: `H:i`,
           dateFormat: `H:i`,
+          minuteIncrement: 1,
           defaultDate: [time.endTime],
           locale: {
             rangeSeparator: ` - `
           },
           onClose: (selectedDates) => {
-            this._newSchedule.startTime = time.startTime;
             this._newSchedule.endTime = selectedDates[0];
           },
           [`time_24hr`]: true
