@@ -1,4 +1,4 @@
-export const TYPES = [
+export default [
   {
     title: `Taxi`,
     icon: `🚕`,

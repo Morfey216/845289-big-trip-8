@@ -3,6 +3,7 @@ import ChartDataLabels from 'chartjs-plugin-datalabels';
 import Component from './component.js';
 
 const BAR_HEIGHT = 55;
+const MILLISECOND_IN_HOUR = 3600 * 1000;
 
 const getTransportData = (pointsData) => {
   const dataForTransportChart = {
@@ -60,6 +61,41 @@ const getMoneyData = (pointsData) => {
   return dataForMoneyChart;
 };
 
+const getTimeSpendData = (pointsData) => {
+  const dataForTimeSpendChart = {
+    labels: [],
+    data: []
+  };
+
+  const timeSpendMap = new Map();
+
+  const getDuration = (schedule) => {
+    return (schedule.endTime - schedule.startTime);
+  };
+
+  const transferToHours = (value) => {
+    return Math.round(value / MILLISECOND_IN_HOUR);
+  };
+
+  for (const pointData of pointsData) {
+    const key = pointData.type;
+    let duration = 0;
+
+    if (timeSpendMap.has(key)) {
+      duration = timeSpendMap.get(key);
+    }
+
+    timeSpendMap.set(key, duration + getDuration(pointData.schedule));
+  }
+
+  timeSpendMap.forEach((value, key) => {
+    dataForTimeSpendChart.labels.push(`${key.icon} ${key.title}`);
+    dataForTimeSpendChart.data.push(transferToHours(value));
+  });
+
+  return dataForTimeSpendChart;
+};
+
 export default class Statistic extends Component {
   constructor(data) {
     super();
@@ -68,14 +104,15 @@ export default class Statistic extends Component {
 
     this._transportData = null;
     this._moneyData = null;
+    this._timeSpendData = null;
 
-    this._chart = null;
     this._moneyCtx = null;
     this._transportCtx = null;
     this._timeSpendCtx = null;
 
     this._moneyChart = null;
     this._transportChart = null;
+    this._timeSpendChart = null;
   }
 
   get template() {
@@ -100,8 +137,10 @@ export default class Statistic extends Component {
 
     this._moneyData = getMoneyData(this._data);
     this._transportData = getTransportData(this._data);
+    this._timeSpendData = getTimeSpendData(this._data);
     this._moneyCtx.height = this._barHeight * this._moneyData.labels.length;
     this._transportCtx.height = this._barHeight * this._transportData.labels.length;
+    this._timeSpendCtx.height = this._barHeight * this._timeSpendData.labels.length;
 
     this._moneyChart = new Chart(this._moneyCtx, {
       plugins: [ChartDataLabels],
@@ -232,17 +271,78 @@ export default class Statistic extends Component {
         }
       }
     });
+
+    this._timeSpendChart = new Chart(this._timeSpendCtx, {
+      plugins: [ChartDataLabels],
+      type: `horizontalBar`,
+      data: {
+        labels: this._timeSpendData.labels,
+        datasets: [{
+          data: this._timeSpendData.data,
+          backgroundColor: `#ffffff`,
+          hoverBackgroundColor: `#ffffff`,
+          anchor: `start`
+        }]
+      },
+      options: {
+        plugins: {
+          datalabels: {
+            font: {
+              size: 13
+            },
+            color: `#000000`,
+            anchor: `end`,
+            align: `start`,
+            formatter: (val) => `${val}H`
+          }
+        },
+        title: {
+          display: true,
+          text: `TIME SPENT`,
+          fontColor: `#000000`,
+          fontSize: 23,
+          position: `left`
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              fontColor: `#000000`,
+              padding: 5,
+              fontSize: 13,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false
+            },
+            barThickness: 44
+          }],
+          xAxes: [{
+            ticks: {
+              display: false,
+              beginAtZero: true,
+            },
+            gridLines: {
+              display: false,
+              drawBorder: false
+            },
+            minBarLength: 50
+          }],
+        },
+        legend: {
+          display: false
+        },
+        tooltips: {
+          enabled: false,
+        }
+      }
+    });
   }
 
   update(data) {
-    this._moneyData = getMoneyData(data);
-    this._transportData = getTransportData(data);
-
-    this._moneyChart.data.labels = this._moneyData.labels;
-    this._moneyChart.data.datasets[0].data = this._moneyData.data;
-    this._transportChart.data.labels = this._transportData.labels;
-    this._transportChart.data.datasets[0].data = this._transportData.data;
-    this._moneyChart.update();
-    this._transportChart.update();
+    this._data = data;
+    this._moneyChart.destroy();
+    this._transportChart.destroy();
+    this._timeSpendChart.destroy();
+    this.renderCharts();
   }
 }

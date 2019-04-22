@@ -2,7 +2,7 @@ import moment from 'moment';
 import API from './api.js';
 import Provider from './provider.js';
 import Store from './store.js';
-import {TYPES} from './get-point-data.js';
+import TYPES from './types.js';
 import filtersData from './filters-data.js';
 import Day from './day.js';
 import Point from './point.js';
@@ -172,6 +172,7 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
 const renderStatistic = (points) => {
   statistic = new Statistic(points);
   mainSection.parentNode.appendChild(statistic.render());
+  statistic.renderCharts();
 
   const statisticSection = document.querySelector(`.statistic`);
 
@@ -194,7 +195,7 @@ const renderStatistic = (points) => {
     mainSection.classList.add(`visually-hidden`);
     statisticSection.classList.remove(`visually-hidden`);
 
-    statistic.renderCharts();
+    statistic.update(tripPoints);
   };
 
   tableButton.addEventListener(`click`, onTableButtonClick);
@@ -214,10 +215,11 @@ const renderFilters = (allFiltersData, allPoints) => {
         newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
         break;
       case `filter-past`:
-        newTripPoints = points.filter((it) => it.schedule.startTime < Date.now());
+        newTripPoints = points.filter((it) => it.schedule.endTime < Date.now());
         break;
     }
-    renderTripPoints(tripDayItemsBlock, newTripPoints);
+    createDaysPointsData(newTripPoints);
+    renderDays();
   };
 
   for (const itFilterData of allFiltersData) {
@@ -382,6 +384,9 @@ const loadData = () => {
     .then((points) => {
       tripPoints = points;
       initRender();
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .catch(() => {
