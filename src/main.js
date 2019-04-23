@@ -40,6 +40,8 @@ let tripTotalCost = 0;
 const cost = new TotalCost(tripTotalCost);
 const daysPointsData = new Map();
 let daysDateKit = [];
+let activeFilterCaption = `filter-everything`;
+let activeSortingCaption = `sorting-event`;
 
 window.addEventListener(`offline`, () => {
   document.title = `${document.title}[OFFLINE]`;
@@ -113,7 +115,8 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
           const dayDate = getDayDate(newUpdatedPoint);
 
           if (dayDate !== dist.parentNode.querySelector(`.trip-day__title`).textContent) {
-            createDaysPointsData(tripPoints);
+            const actualPoints = getFilteredPoints(tripPoints, activeFilterCaption);
+            createDaysPointsData(actualPoints);
             renderDays();
           } else {
             pointComponent.update(newPoint);
@@ -121,6 +124,7 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
             dist.replaceChild(pointComponent.element, editPointComponent.element);
             editPointComponent.unrender();
           }
+          sortPoints(daysPointsData, activeSortingCaption);
         })
         .catch(() => {
           editPointComponent.formActivate().showError();
@@ -205,24 +209,36 @@ const renderStatistic = (points) => {
   statisticButton.addEventListener(`click`, onStatisticButtonClick);
 };
 
+const getFilteredPoints = (points, filter) => {
+  let resultPoints = [];
+  switch (filter) {
+    case `filter-everything`:
+      activeFilterCaption = `filter-everything`;
+      resultPoints = points;
+      break;
+    case `filter-future`:
+      activeFilterCaption = `filter-future`;
+      resultPoints = points.filter((it) => it.schedule.startTime > Date.now());
+      break;
+    case `filter-past`:
+      activeFilterCaption = `filter-past`;
+      resultPoints = points.filter((it) => it.schedule.endTime < Date.now());
+      break;
+  }
+  return resultPoints;
+};
+
 const renderFilters = (allFiltersData, allPoints) => {
   filtersForm.innerHTML = ``;
 
-  const filteredPoints = (points, filter) => {
-    let newTripPoints = [];
-    switch (filter) {
-      case `filter-everything`:
-        newTripPoints = points;
-        break;
-      case `filter-future`:
-        newTripPoints = points.filter((it) => it.schedule.startTime > Date.now());
-        break;
-      case `filter-past`:
-        newTripPoints = points.filter((it) => it.schedule.endTime < Date.now());
-        break;
-    }
+  const filteredPoints = (filter) => {
+    const newTripPoints = getFilteredPoints(allPoints, filter);
     createDaysPointsData(newTripPoints);
-    renderDays();
+    if (activeSortingCaption !== `sorting-event`) {
+      sortPoints(daysPointsData, activeSortingCaption);
+    } else {
+      renderDays();
+    }
   };
 
   for (const itFilterData of allFiltersData) {
@@ -230,7 +246,7 @@ const renderFilters = (allFiltersData, allPoints) => {
 
     filterComponent.onFilter = (evt) => {
       const filterCaption = evt.target.htmlFor;
-      filteredPoints(allPoints, filterCaption);
+      filteredPoints(filterCaption);
     };
 
     const filterElement = filterComponent.render();
@@ -238,40 +254,44 @@ const renderFilters = (allFiltersData, allPoints) => {
   }
 };
 
+const sortByDuration = (daysPoints) => {
+  for (const dayPoints of daysPoints.values()) {
+    dayPoints.sort((first, second) => {
+      const firstDuration = (first.schedule.endTime - first.schedule.startTime);
+      const secondDuration = (second.schedule.endTime - second.schedule.startTime);
+      return secondDuration - firstDuration;
+    });
+  }
+};
+
+const sortByPrice = (daysPoints) => {
+  for (const dayPoints of daysPoints.values()) {
+    dayPoints.sort((first, second) => second.fullCost - first.fullCost);
+  }
+};
+
+const sortPoints = (points, caption) => {
+  const actualPoints = getFilteredPoints(tripPoints, activeFilterCaption);
+  switch (caption) {
+    case `sorting-event`:
+      activeSortingCaption = `sorting-event`;
+      createDaysPointsData(actualPoints);
+      break;
+    case `sorting-time`:
+      activeSortingCaption = `sorting-time`;
+      sortByDuration(points);
+      break;
+    case `sorting-price`:
+      activeSortingCaption = `sorting-price`;
+      sortByPrice(points);
+      break;
+  }
+  renderDays();
+};
+
 const renderSortings = (allSortingData, allDaysPoints) => {
   const temporaryItem = sortingForm.removeChild(sortingOffersItem);
   sortingForm.innerHTML = ``;
-
-  const sortByDuration = (daysPoints) => {
-    for (const dayPoints of daysPoints.values()) {
-      dayPoints.sort((first, second) => {
-        const firstDuration = (first.schedule.endTime - first.schedule.startTime);
-        const secondDuration = (second.schedule.endTime - second.schedule.startTime);
-        return secondDuration - firstDuration;
-      });
-    }
-  };
-
-  const sortByPrice = (daysPoints) => {
-    for (const dayPoints of daysPoints.values()) {
-      dayPoints.sort((first, second) => second.fullCost - first.fullCost);
-    }
-  };
-
-  const sortPoints = (points, caption) => {
-    switch (caption) {
-      case `sorting-event`:
-        createDaysPointsData(tripPoints);
-        break;
-      case `sorting-time`:
-        sortByDuration(points);
-        break;
-      case `sorting-price`:
-        sortByPrice(points);
-        break;
-    }
-    renderDays();
-  };
 
   for (const itSortingData of allSortingData) {
     const sortingComponent = new Sorting(itSortingData);
