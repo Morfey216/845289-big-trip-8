@@ -1,9 +1,8 @@
-import moment from 'moment';
+import {TYPES, FILTER_CAPTIONS, SORTING_CAPTIONS} from './data.js';
+import {getControlItems} from './util.js';
 import API from './api.js';
 import Provider from './provider.js';
 import Store from './store.js';
-import TYPES from './types.js';
-import filtersData from './filters-data.js';
 import Day from './day.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
@@ -11,6 +10,7 @@ import Filter from './filter.js';
 import Sorting from './sorting.js';
 import Statistic from './statistic.js';
 import TotalCost from './total-cost.js';
+import moment from 'moment';
 
 const AUTHORIZATION = `Basic eo0w590ik37389a`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
@@ -24,6 +24,8 @@ const mainSection = document.querySelector(`.main`);
 const tableButton = document.querySelector(`.view-switch__item[href="#table"]`);
 const statisticButton = document.querySelector(`.view-switch__item[href="#stats"]`);
 const filtersForm = document.querySelector(`.trip-filter`);
+const sortingForm = document.querySelector(`.trip-sorting`);
+const sortingOffersItem = document.querySelector(`.trip-sorting__item--offers`);
 const tripDaysBlock = document.querySelector(`.trip-points`);
 const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
 const totalCostElement = document.querySelector(`.trip__total`);
@@ -236,6 +238,55 @@ const renderFilters = (allFiltersData, allPoints) => {
   }
 };
 
+const renderSortings = (allSortingData, allDaysPoints) => {
+  const temporaryItem = sortingForm.removeChild(sortingOffersItem);
+  sortingForm.innerHTML = ``;
+
+  const sortByDuration = (daysPoints) => {
+    for (const dayPoints of daysPoints.values()) {
+      dayPoints.sort((first, second) => {
+        const firstDuration = (first.schedule.endTime - first.schedule.startTime);
+        const secondDuration = (second.schedule.endTime - second.schedule.startTime);
+        return secondDuration - firstDuration;
+      });
+    }
+  };
+
+  const sortByPrice = (daysPoints) => {
+    for (const dayPoints of daysPoints.values()) {
+      dayPoints.sort((first, second) => second.fullCost - first.fullCost);
+    }
+  };
+
+  const sortPoints = (points, caption) => {
+    switch (caption) {
+      case `sorting-event`:
+        createDaysPointsData(tripPoints);
+        break;
+      case `sorting-time`:
+        sortByDuration(points);
+        break;
+      case `sorting-price`:
+        sortByPrice(points);
+        break;
+    }
+    renderDays();
+  };
+
+  for (const itSortingData of allSortingData) {
+    const sortingComponent = new Sorting(itSortingData);
+
+    sortingComponent.onSorting = (evt) => {
+      const sortingCaption = evt.target.htmlFor;
+      sortPoints(allDaysPoints, sortingCaption);
+    };
+
+    const filterElement = sortingComponent.render();
+    sortingForm.appendChild(filterElement);
+    sortingForm.appendChild(temporaryItem);
+  }
+};
+
 const renderTripTotalCost = (currentTotalCost) => {
   cost.update(currentTotalCost);
   const costElement = cost.render();
@@ -361,7 +412,8 @@ const initRender = () => {
   renderDays();
   renderTripTotalCost(tripTotalCost);
   renderStatistic(tripPoints);
-  renderFilters(filtersData(), tripPoints);
+  renderFilters(getControlItems(FILTER_CAPTIONS), tripPoints);
+  renderSortings(getControlItems(SORTING_CAPTIONS), daysPointsData);
 };
 
 const loadData = () => {

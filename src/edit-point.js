@@ -1,7 +1,7 @@
 import moment from 'moment';
 import flatpickr from 'flatpickr';
 import Component from './component.js';
-import isEscEvent from './util.js';
+import {isEscEvent} from './util.js';
 
 export default class EditPoint extends Component {
   constructor(data) {
