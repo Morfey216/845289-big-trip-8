@@ -8,6 +8,7 @@ import Day from './day.js';
 import Point from './point.js';
 import EditPoint from './edit-point.js';
 import Filter from './filter.js';
+import Sorting from './sorting.js';
 import Statistic from './statistic.js';
 import TotalCost from './total-cost.js';
 
@@ -260,7 +261,7 @@ const createOffersNameKit = (kit) => {
 const createOffersLabelKit = (namesKit) => {
   const labelsKit = [];
   namesKit.forEach((it) => {
-    labelsKit.push(it.toLowerCase().replace(/ /g, `-`).replace(/,/g, ``).replace(/'/g, `-`));
+    labelsKit.push(it.toLowerCase().replace(/[' ]/g, `-`).replace(/,/g, ``));
   });
 
   return labelsKit;
