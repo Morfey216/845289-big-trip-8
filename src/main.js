@@ -384,9 +384,6 @@ const loadData = () => {
     .then((points) => {
       tripPoints = points;
       initRender();
-    })
-    .catch(() => {
-      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .catch(() => {
