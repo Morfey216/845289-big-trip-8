@@ -1,4 +1,4 @@
-export const TYPES = [
+const TYPES = [
   {
     title: `Taxi`,
     icon: `🚕`,
@@ -50,3 +50,17 @@ export const TYPES = [
     group: `service`
   }
 ];
+
+const FILTER_CAPTIONS = [
+  `Everything`,
+  `Future`,
+  `Past`
+];
+
+const SORTING_CAPTIONS = [
+  `Event`,
+  `Time`,
+  `Price`
+];
+
+export {TYPES, FILTER_CAPTIONS, SORTING_CAPTIONS};

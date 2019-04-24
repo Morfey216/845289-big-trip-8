@@ -31,19 +31,19 @@ export default class Provider {
     }
   }
 
-  createPoint({newPoint}) {
+  createPoint({data}) {
     if (this._isOnline()) {
-      return this._api.createPoint({newPoint})
+      return this._api.createPoint({data})
         .then((point) => {
           this._store.setItem({key: point.id, item: point.toRAW()});
           return point;
         });
     } else {
-      newPoint.id = this._generateId();
+      data.id = this._generateId();
       this._needSync = true;
 
-      this._store.setItem({key: newPoint.id, item: newPoint});
-      return Promise.resolve(ModelPoint.parsePoint(newPoint));
+      this._store.setItem({key: data.id, item: data});
+      return Promise.resolve(ModelPoint.parsePoint(data));
     }
   }
 
@@ -74,6 +74,10 @@ export default class Provider {
 
       return Promise.resolve(points);
     }
+  }
+
+  getNewPoint() {
+    return ModelPoint.parsePoint({'destination': ``, 'date_from': Date.now(), 'date_to': Date.now()});
   }
 
   syncPoints() {
