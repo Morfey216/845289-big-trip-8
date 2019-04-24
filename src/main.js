@@ -12,7 +12,7 @@ import Statistic from './statistic.js';
 import TotalCost from './total-cost.js';
 import moment from 'moment';
 
-const AUTHORIZATION = `Basic eo0w590ik82696a`;
+const AUTHORIZATION = `Basic eo0w590ik826886a`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 const POINTS_STORE_KEY = `points-store-key`;
 
@@ -418,6 +418,8 @@ const createDaysPointsData = (points) => {
 };
 
 const renderDays = () => {
+  inEditMode = false;
+  newEventButton.disabled = false;
   const daysFragment = document.createDocumentFragment();
 
   for (let i = 0; i < daysDateKit.length; i++) {
@@ -434,6 +436,10 @@ const renderDays = () => {
 };
 
 const onNewEventButtonClick = () => {
+  if (inEditMode) {
+    return;
+  }
+
   newEventButton.disabled = true;
   inEditMode = true;
 
@@ -526,6 +532,9 @@ const loadData = () => {
     .then((points) => {
       tripPoints = points;
       initRender();
+    })
+    .catch(() => {
+      tripDayItemsBlock.textContent = loadErrorText;
     });
   })
   .catch(() => {
