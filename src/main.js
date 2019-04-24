@@ -473,6 +473,7 @@ const onNewEventButtonClick = () => {
     provider.createPoint({data: newPointData.toRAW()})
       .then((newPoint) => {
         inEditMode = false;
+        newEventButton.disabled = false;
         unblock();
         createFullPointData(newPoint);
         tripPoints.push(newPoint);
