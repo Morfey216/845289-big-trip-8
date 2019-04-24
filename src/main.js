@@ -12,7 +12,7 @@ import Statistic from './statistic.js';
 import TotalCost from './total-cost.js';
 import moment from 'moment';
 
-const AUTHORIZATION = `Basic eo0w590ik37389a`;
+const AUTHORIZATION = `Basic eo0w590ik82696a`;
 const END_POINT = `https://es8-demo-srv.appspot.com/big-trip`;
 const POINTS_STORE_KEY = `points-store-key`;
 
@@ -29,6 +29,7 @@ const sortingOffersItem = document.querySelector(`.trip-sorting__item--offers`);
 const tripDaysBlock = document.querySelector(`.trip-points`);
 const tripDayItemsBlock = document.querySelector(`.trip-day__items`);
 const totalCostElement = document.querySelector(`.trip__total`);
+const newEventButton = document.querySelector(`.new-event`);
 
 let destinationsKit = [];
 let offersKit = [];
@@ -42,6 +43,7 @@ const daysPointsData = new Map();
 let daysDateKit = [];
 let activeFilterCaption = `filter-everything`;
 let activeSortingCaption = `sorting-event`;
+let inEditMode = false;
 
 window.addEventListener(`offline`, () => {
   document.title = `${document.title}[OFFLINE]`;
@@ -86,9 +88,12 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
     const editPointComponent = new EditPoint(itPointData);
 
     pointComponent.onEdit = () => {
-      editPointComponent.render();
-      dist.replaceChild(editPointComponent.element, pointComponent.element);
-      pointComponent.unrender();
+      if (!inEditMode) {
+        editPointComponent.render();
+        dist.replaceChild(editPointComponent.element, pointComponent.element);
+        pointComponent.unrender();
+        inEditMode = true;
+      }
     };
 
     editPointComponent.onSave = (newObject) => {
@@ -105,6 +110,7 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
 
       provider.updatePoint({id: updatedPoint.id, data: updatedPoint.toRAW()})
         .then((newPoint) => {
+          inEditMode = false;
           unblock();
           createFullPointData(newPoint);
           const newUpdatedPoint = updatePointData(itPointData, newPoint);
@@ -133,6 +139,7 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
     };
 
     editPointComponent.onReset = () => {
+      inEditMode = false;
       pointComponent.render();
       dist.replaceChild(pointComponent.element, editPointComponent.element);
       editPointComponent.unrender();
@@ -149,6 +156,7 @@ const renderTripPoints = (dist, fractionPointsData = tripPoints) => {
 
       provider.deletePoint({id})
         .then(() => {
+          inEditMode = false;
           unblock();
           dist.removeChild(editPointComponent.element);
           editPointComponent.unrender();
@@ -425,6 +433,65 @@ const renderDays = () => {
   tripDaysBlock.appendChild(daysFragment);
 };
 
+const onNewEventButtonClick = () => {
+  newEventButton.disabled = true;
+  inEditMode = true;
+
+  const newPointData = provider.getNewPoint();
+  createFullPointData(newPointData);
+  newPointData.type = newPointData.types[0];
+
+  const newPointComponent = new EditPoint(newPointData);
+  tripDaysBlock.insertBefore(newPointComponent.render(), tripDaysBlock.firstChild);
+
+  const closeNewPointComponent = () => {
+    inEditMode = false;
+    tripDaysBlock.removeChild(newPointComponent.element);
+    newPointComponent.unrender();
+    newEventButton.disabled = false;
+  };
+
+  newPointComponent.onReset = () => {
+    closeNewPointComponent();
+  };
+
+  newPointComponent.onDelete = () => {
+    closeNewPointComponent();
+  };
+
+  newPointComponent.onSave = (pointToSave) => {
+    Object.assign(newPointData, newPointData, pointToSave);
+
+    newPointComponent.formActivate().showSaveButtonText(`Saving...`);
+    newPointComponent.formActivate().block();
+
+    const unblock = () => {
+      newPointComponent.formActivate().showSaveButtonText(`Save`);
+      newPointComponent.formActivate().unblock();
+    };
+
+    provider.createPoint({data: newPointData.toRAW()})
+      .then((newPoint) => {
+        inEditMode = false;
+        unblock();
+        createFullPointData(newPoint);
+        tripPoints.push(newPoint);
+
+        tripTotalCost = tripTotalCost + newPoint.fullCost;
+        renderTripTotalCost(tripTotalCost);
+
+        const actualPoints = getFilteredPoints(tripPoints, activeFilterCaption);
+        createDaysPointsData(actualPoints);
+
+        sortPoints(daysPointsData, activeSortingCaption);
+      })
+      .catch(() => {
+        newPointComponent.formActivate().showError();
+        unblock();
+      });
+  };
+};
+
 const initRender = () => {
   createFullOffersData();
   createFullPointsData();
@@ -434,6 +501,7 @@ const initRender = () => {
   renderStatistic(tripPoints);
   renderFilters(getControlItems(FILTER_CAPTIONS), tripPoints);
   renderSortings(getControlItems(SORTING_CAPTIONS), daysPointsData);
+  newEventButton.addEventListener(`click`, onNewEventButtonClick);
 };
 
 const loadData = () => {

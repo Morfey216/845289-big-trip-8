@@ -1,9 +1,7 @@
-const Keycode = {
-  ESC: 27
-};
+const ESC_KEYCODE = 27;
 
 const isEscEvent = (evt, action) => {
-  if (evt.keyCode === Keycode.ESC) {
+  if (evt.keyCode === ESC_KEYCODE) {
     evt.preventDefault();
     action();
   }

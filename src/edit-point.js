@@ -25,6 +25,7 @@ export default class EditPoint extends Component {
     this._state.typeIsChanged = false;
     this._state.destinationIsChanged = false;
 
+    this._day = ``;
     this._onSave = null;
     this._onReset = null;
     this._onDelete = null;
@@ -109,6 +110,7 @@ export default class EditPoint extends Component {
     entry.pictures = currentDestination.pictures;
     entry.schedule = this._getNewSchedule();
     entry.isFavorite = !!this._element.querySelector(`.point__favorite-input`).checked;
+
     return entry;
   }
 
@@ -253,7 +255,7 @@ export default class EditPoint extends Component {
 
       <div class="point__destination-wrap">
         <label class="point__destination-label" for="destination">${this._type.title} to</label>
-        <input class="point__destination-input" list="destination-select" id="destination" value="${this._place}" name="destination">
+        <input class="point__destination-input" list="destination-select" id="destination" value="${this._place}" name="destination" placeholder="SELECT DESTINATION">
         <datalist id="destination-select">
           ${this._destinations.map((destination) => (
     `<option value="${destination.name}"></option>`)).join(``)}
@@ -319,7 +321,25 @@ export default class EditPoint extends Component {
 
     const startTimeInput = this._element.querySelector(`.point__time input[name="date-start"]`);
     const endTimeInput = this._element.querySelector(`.point__time input[name="date-end"]`);
+    const dayInput = this._element.querySelector(`.point__input`);
     const time = this._schedule;
+
+    flatpickr(
+        dayInput,
+        {
+          enableTime: false,
+          altInput: true,
+          altFormat: `M d`,
+          dateFormat: `M d`,
+          defaultDate: [time.startTime],
+          onClose: (selectedDates) => {
+            this._day = selectedDates[0];
+            this._schedule.startTime = selectedDates[0];
+            this._schedule.endTime = selectedDates[0];
+          },
+          [`time_24hr`]: true
+        }
+    );
 
     flatpickr(
         startTimeInput,
